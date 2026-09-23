@@ -1,4 +1,4 @@
-use tta::tta::Msg;
+use lib::tta::Msg;
 
 //============================================================
 // cmp: two-operand comparisons with boolean (0/1) result
@@ -8,7 +8,7 @@ use tta::tta::Msg;
 // - Latency: 1 Cycle
 //============================================================
 
-enum CmpOp { 
+pub enum CmpOp {
     Eq,     // A == B
     Neq,    // A != B
     Slt,    // signed A <  B
@@ -18,7 +18,7 @@ enum CmpOp {
 }
 
 
-entity cmp_fu(
+pub entity cmp_fu(
   clk: clock, rst: bool,
   set_op_a: Option<uint<32>>,
   trig:    Option<(CmpOp, uint<32>)>
@@ -48,41 +48,41 @@ entity cmp_fu(
 
 // Bus helpers
 
-fn pick_cmp_seta(m0: Option<Msg>, m1: Option<Msg>) -> Option<uint<32>> {
+pub fn pick_cmp_seta(m0: Option<Msg>, m1: Option<Msg>) -> Option<uint<32>> {
     match m1 {
         Some(Msg::Cmp_SetA(x)) => Some(x),
-        _ => match m0 { 
-            Some(Msg::Cmp_SetA(x)) => Some(x), 
+        _ => match m0 {
+            Some(Msg::Cmp_SetA(x)) => Some(x),
             _ => None }
     }
 }
 
-fn pick_cmp_trig(m0: Option<Msg>, m1: Option<Msg>) -> Option<(CmpOp, uint<32>)> {
+pub fn pick_cmp_trig(m0: Option<Msg>, m1: Option<Msg>) -> Option<(CmpOp, uint<32>)> {
     match m1 {
         Some(Msg::Cmp_Trig(op, x)) => Some((op, x)),
-        _ => match m0 { 
-            Some(Msg::Cmp_Trig(op, x)) => Some((op, x)), 
-            _ => None 
+        _ => match m0 {
+            Some(Msg::Cmp_Trig(op, x)) => Some((op, x)),
+            _ => None
         }
     }
 }
 
 // convert bool to u32
-fn to_u32(x: bool) -> uint<32> { 
-    if x { 
-        1u32 
-    } else { 
-        0u32 
-    } 
+fn to_u32(x: bool) -> uint<32> {
+    if x {
+        1u32
+    } else {
+        0u32
+    }
 }
 
 // Signed less-than helper (twos-complement) without casting
 fn signed_lt(a: uint<32>, b: uint<32>) -> bool {
     let sa: uint<1> = trunc((a >> 31) & 1u32);
     let sb: uint<1> = trunc((b >> 31) & 1u32);
-    if sa != sb { 
-        sa == 1u1 
-    } else { 
-        a < b 
+    if sa != sb {
+        sa == 1u1
+    } else {
+        a < b
     }
 }

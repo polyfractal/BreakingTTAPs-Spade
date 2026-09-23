@@ -1,4 +1,4 @@
-use tta::tta::Msg;
+use lib::tta::Msg;
 
 //============================================================
 // Conditional Move (SEL) Functional Unit
@@ -7,7 +7,7 @@ use tta::tta::Msg;
 // - Latency: 1 Cycle
 //============================================================
 
-entity sel_fu(
+pub entity sel_fu(
     clk: clock,
     rst: bool,
     set_cond: Option<bool>,    // Set Condition Flag
@@ -43,23 +43,23 @@ entity sel_fu(
 
 // Bus helpers
 
-fn pick_sel_cond(m0: Option<Msg>, m1: Option<Msg>) -> Option<bool> {
+pub fn pick_sel_cond(m0: Option<Msg>, m1: Option<Msg>) -> Option<bool> {
     match m1 {
         Some(Msg::SEL_Cond(a)) => Some(a),
         _ => match m0 { Some(Msg::SEL_Cond(a)) => Some(a), _ => None }
     }
-} 
+}
 
-fn pick_sel_seta(m0: Option<Msg>, m1: Option<Msg>) -> Option<uint<32>> {
+pub fn pick_sel_seta(m0: Option<Msg>, m1: Option<Msg>) -> Option<uint<32>> {
     match m1 {
         Some(Msg::SEL_SetA(a)) => Some(a),
         _ => match m0 { Some(Msg::SEL_SetA(a)) => Some(a), _ => None }
     }
-} 
+}
 
-fn pick_sel_trigb(m0: Option<Msg>, m1: Option<Msg>) -> Option<uint<32>> {
+pub fn pick_sel_trigb(m0: Option<Msg>, m1: Option<Msg>) -> Option<uint<32>> {
     match m1 {
         Some(Msg::SEL_TrigB(a)) => Some(a),
         _ => match m0 { Some(Msg::SEL_TrigB(a)) => Some(a), _ => None }
     }
-} 
+}

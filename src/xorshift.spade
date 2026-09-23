@@ -1,4 +1,4 @@
-use tta::tta::Msg;
+use lib::tta::Msg;
 
 //============================================================
 // Xorshift32 Pseudo-Random Number Generator
@@ -13,14 +13,14 @@ fn next_xorshift32(x: uint<32>) -> uint<32> {
     // x ^= x << 13;
     // x ^= x >> 17;
     // x ^= x << 5;
-    
+
     let x1 = x ^ trunc(x << 13);
     let x2 = x1 ^ (x1 >> 17);
     let x3 = x2 ^ trunc(x2 << 5);
     x3
 }
 
-entity xorshift_fu(
+pub entity xorshift_fu(
     clk: clock,
     rst: bool,
     trig: Option<uint<32>>      // None or 0 = Step, Some(val)=Reseed & Step
@@ -52,12 +52,12 @@ entity xorshift_fu(
 
 // Bus helper
 
-fn pick_xorshift_trig(m0: Option<Msg>, m1: Option<Msg>) -> Option<uint<32>> {
+pub fn pick_xorshift_trig(m0: Option<Msg>, m1: Option<Msg>) -> Option<uint<32>> {
     match m1 {
         Some(Msg::Xorshift_Trig(x)) => Some(x),
-        _ => match m0 { 
-            Some(Msg::Xorshift_Trig(x)) => Some(x), 
-            _ => None 
+        _ => match m0 {
+            Some(Msg::Xorshift_Trig(x)) => Some(x),
+            _ => None
         }
     }
 }

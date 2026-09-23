@@ -1,4 +1,4 @@
-use tta::tta::Msg;
+use lib::tta::Msg;
 
 //============================================================
 // Integer Multiply-Accumulate (MAC)
@@ -7,7 +7,7 @@ use tta::tta::Msg;
 // - Precision: 32-bit Integer (Wrapping)
 //============================================================
 
-entity mac_fu(
+pub entity mac_fu(
     clk: clock,
     rst: bool,
     set_op_a: Option<uint<32>>, // Set Operand A
@@ -61,31 +61,31 @@ entity mac_fu(
 }
 
 // Bus helpers
-fn pick_mac_seta(m0: Option<Msg>, m1: Option<Msg>) -> Option<uint<32>> {
-    match m1 { 
-        Some(Msg::MAC_SetA(x)) => Some(x), 
-        _ => match m0 { 
-            Some(Msg::MAC_SetA(x)) => Some(x), 
-            _ => None 
-        } 
+pub fn pick_mac_seta(m0: Option<Msg>, m1: Option<Msg>) -> Option<uint<32>> {
+    match m1 {
+        Some(Msg::MAC_SetA(x)) => Some(x),
+        _ => match m0 {
+            Some(Msg::MAC_SetA(x)) => Some(x),
+            _ => None
+        }
     }
 }
 
-fn pick_mac_trig(m0: Option<Msg>, m1: Option<Msg>) -> Option<uint<32>> {
-    match m1 { 
-        Some(Msg::MAC_Trig(x)) => Some(x), 
-        _ => match m0 { 
-            Some(Msg::MAC_Trig(x)) => Some(x), 
-            _ => None 
-        } 
+pub fn pick_mac_trig(m0: Option<Msg>, m1: Option<Msg>) -> Option<uint<32>> {
+    match m1 {
+        Some(Msg::MAC_Trig(x)) => Some(x),
+        _ => match m0 {
+            Some(Msg::MAC_Trig(x)) => Some(x),
+            _ => None
+        }
     }
 }
 
-fn pick_mac_clear(m0: Option<Msg>, m1: Option<Msg>) -> bool {
-    match m1 { 
-        Some(Msg::MAC_Clear(x)) => x, 
-        _ => match m0 { 
-            Some(Msg::MAC_Clear(x)) => x, 
+pub fn pick_mac_clear(m0: Option<Msg>, m1: Option<Msg>) -> bool {
+    match m1 {
+        Some(Msg::MAC_Clear(x)) => x,
+        _ => match m0 {
+            Some(Msg::MAC_Clear(x)) => x,
             _ => false
         } }
 }

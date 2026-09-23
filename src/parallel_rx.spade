@@ -11,7 +11,7 @@ struct ParallelRx {
     data: uint<8>       // Latched data
 }
 
-entity parallel_boot(
+pub entity parallel_boot(
     clk: clock,
     rst: bool,
     data_in: uint<8>,  // 8-bit Parallel Data Bus
@@ -22,7 +22,7 @@ entity parallel_boot(
     // Dual FF synchronizer to avoid metastability
     reg(clk) clk_pin_s1: bool reset(rst: false) = clk_pin;
     reg(clk) clk_pin_s2: bool reset(rst: false) = clk_pin_s1;
-    
+
     // I don't think we have to register these, but doing it just to be safe
     reg(clk) data_sync: uint<8> reset(rst: 0) = data_in;
     reg(clk) strobe_sync: bool reset(rst: false) = strobe;
@@ -35,7 +35,7 @@ entity parallel_boot(
     // Output Logic
     // Detect Rising Edge of the External Clock Pin (0 -> 1)
     let rising_edge = !rx.last_clk_pin && clk_pin_s2;
-    
+
     // Valid transaction if Rising Edge AND Strobe is Active
     if rising_edge && strobe_sync {
         Some(rx.data)

@@ -1,15 +1,15 @@
-use tta::tta::Msg;
+use lib::tta::Msg;
 
 //============================================================
 // Bit manipulation functional unit
 // - Latency: 1 Cycle
 //============================================================
 
-enum BitOp { 
+pub enum BitOp {
     Clz, Ctz, Popcnt, Bset, Bclr, Bext, Bins, Brev
 }
 
-entity bit_fu(
+pub entity bit_fu(
   clk: clock, rst: bool,
   set_op_a: Option<uint<32>>,
   trig:     Option<(BitOp, uint<32>)>
@@ -22,7 +22,7 @@ entity bit_fu(
     };
 
     // Combinational core
-    let result: Option<uint<32>> = match trig {        
+    let result: Option<uint<32>> = match trig {
         Some((BitOp::Clz, _))    => Some(clz32(op_a)),
         Some((BitOp::Ctz, _))    => Some(ctz32(op_a)),
         Some((BitOp::Popcnt, _)) => Some(popcnt32(op_a)),
@@ -30,12 +30,12 @@ entity bit_fu(
 
         Some((BitOp::Bset, b))   => Some(op_a | (1 << (b & 31))),
         Some((BitOp::Bclr, b))   => Some(op_a & ~(1 << (b & 31))),
-        
+
         // BEXT/BINS use b to encode {width, lsb}
         // b[4:0] = LSB, b[9:5] = Width-1 (0..31 maps to length 1..32)
         Some((BitOp::Bext, b)) => Some(bext32(op_a, b)),
         Some((BitOp::Bins, b)) => Some(bins32(op_a, b)),
-        
+
         None => None
     };
 
@@ -96,17 +96,17 @@ fn popcnt32(val: uint<32>) -> uint<32> {
 fn bext32(val: uint<32>, ctrl: uint<32>) -> uint<32> {
     let lsb = ctrl & 0x1F;
     let width_minus_1 = (ctrl >> 5) & 0x1F;
-    
-    // Create mask of 'width' 1s. 
+
+    // Create mask of 'width' 1s.
     // Example: width=1 -> mask=1. width=32 -> mask=0xFFFFFFFF.
-    // (2 << width_minus_1) - 1 handles width 1..31. 
+    // (2 << width_minus_1) - 1 handles width 1..31.
     // width 32 (width_minus_1=31) overflows 32-bit shift if not careful.
     let mask = if width_minus_1 == 31 {
         0xFFFFFFFF
     } else {
         trunc((1 << (width_minus_1 + 1)) - 1)
     };
-    
+
     (val >> lsb) & mask
 }
 
@@ -115,34 +115,34 @@ fn bext32(val: uint<32>, ctrl: uint<32>) -> uint<32> {
 fn bins32(val: uint<32>, ctrl: uint<32>) -> uint<32> {
     let lsb = ctrl & 0x1F;
     let width_minus_1 = (ctrl >> 5) & 0x1F;
-    
+
     let mask = if width_minus_1 == 31 {
         0xFFFFFFFF
     } else {
         trunc((1 << (width_minus_1 + 1)) - 1)
     };
-    
+
     (val & mask) << lsb
 }
 
 
 // Bus helpers
 
-fn pick_bit_seta(m0: Option<Msg>, m1: Option<Msg>) -> Option<uint<32>> {
+pub fn pick_bit_seta(m0: Option<Msg>, m1: Option<Msg>) -> Option<uint<32>> {
     match m1 {
         Some(Msg::BIT_SetA(x)) => Some(x),
-        _ => match m0 { 
-            Some(Msg::BIT_SetA(x)) => Some(x), 
+        _ => match m0 {
+            Some(Msg::BIT_SetA(x)) => Some(x),
             _ => None }
     }
 }
 
-fn pick_bit_trig(m0: Option<Msg>, m1: Option<Msg>) -> Option<(BitOp, uint<32>)> {
+pub fn pick_bit_trig(m0: Option<Msg>, m1: Option<Msg>) -> Option<(BitOp, uint<32>)> {
     match m1 {
         Some(Msg::BIT_Trig(op, x)) => Some((op, x)),
-        _ => match m0 { 
-            Some(Msg::BIT_Trig(op, x)) => Some((op, x)), 
-            _ => None 
+        _ => match m0 {
+            Some(Msg::BIT_Trig(op, x)) => Some((op, x)),
+            _ => None
         }
     }
 }

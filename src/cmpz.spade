@@ -1,15 +1,15 @@
-use tta::tta::Msg;
+use lib::tta::Msg;
 
 //============================================================
 // cmpz: compare-to-zero with boolean (0/1) result
-// 
+//
 // Signed semantics for SLTZ/SLEZ/SGTZ/SGEZ
 // - trigger with RH
 // - CMPZ_Res holds boolean comparison against zero
 // - Latency: 1 Cycle
 //============================================================
 
-enum CmpzOp { 
+pub enum CmpzOp {
     Eqz,     // B == 0
     Neqz,    // B != 0
     Sltz,    // signed B <  0
@@ -18,7 +18,7 @@ enum CmpzOp {
     Sgez     // signed B >= 0
 }
 
-entity cmpz_fu(
+pub entity cmpz_fu(
   clk: clock, rst: bool,
   trig: Option<(CmpzOp, uint<32>)>
 ) -> Option<uint<32>>
@@ -40,12 +40,12 @@ entity cmpz_fu(
 }
 
 // Bus helper
-fn pick_cmpz_trig(m0: Option<Msg>, m1: Option<Msg>) -> Option<(CmpzOp, uint<32>)> {
+pub fn pick_cmpz_trig(m0: Option<Msg>, m1: Option<Msg>) -> Option<(CmpzOp, uint<32>)> {
     match m1 {
         Some(Msg::Cmpz_Trig(op, x)) => Some((op, x)),
-        _ => match m0 { 
-            Some(Msg::Cmpz_Trig(op, x)) => Some((op, x)), 
-            _ => None 
+        _ => match m0 {
+            Some(Msg::Cmpz_Trig(op, x)) => Some((op, x)),
+            _ => None
         }
     }
 }

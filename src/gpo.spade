@@ -1,4 +1,4 @@
-use tta::tta::Msg;
+use lib::tta::Msg;
 
 //============================================================
 // General purpose output
@@ -7,26 +7,26 @@ use tta::tta::Msg;
 //============================================================
 
 // General purpose output
-entity gpo16(
+pub entity gpo16(
   clk: clock, rst: bool,
   wr: Option<uint<16>>
 ) -> uint<16>              // pins
 {
   reg(clk) outv: uint<16> reset(rst: 0u16) =
-    match wr { 
-      Some(v) => v, 
-      None => outv 
+    match wr {
+      Some(v) => v,
+      None => outv
     };
 
   outv
 }
 
 // Bus helper
-fn pick_gpo16(m0: Option<Msg>, m1: Option<Msg>) -> Option<uint<16>> {
+pub fn pick_gpo16(m0: Option<Msg>, m1: Option<Msg>) -> Option<uint<16>> {
     match m1 {
         Some(Msg::GPO_Out(x)) => Some(x),
-        _ => match m0 { 
-            Some(Msg::GPO_Out(x)) => Some(x), 
+        _ => match m0 {
+            Some(Msg::GPO_Out(x)) => Some(x),
             _ => None }
     }
 }

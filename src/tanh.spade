@@ -1,4 +1,4 @@
-use tta::tta::Msg;
+use lib::tta::Msg;
 
 //============================================================
 // Piecewise-Linear Tanh Functional Unit (Symmetric)
@@ -9,7 +9,7 @@ use tta::tta::Msg;
 // - Latency: 1 cycle
 //============================================================
 
-entity tanh_pwl_fu(
+pub entity tanh_pwl_fu(
     clk: clock,
     rst: bool,
     trig: Option<uint<32>> // Input X (uint<32> carrying Q1.15)
@@ -19,11 +19,11 @@ entity tanh_pwl_fu(
         Some(val_32) => {
             // Extract bottom 16 bits (uint<16>) and reinterpret bits as signed (int<16>)
             let val_u16: uint<16> = trunc(val_32);
-            let x: int<16> = val_u16.to_int();
+            let x: int<16> = val_u16.as_int();
             // Expand to 17 bits to safely handle abs(MIN_INT) i.e. abs(-32768) which is +32768
             let x_17: int<17> = sext(x);
             let is_neg = x_17 < 0;
-            
+
             // 0 - x_17 produces int<18> (one bit growth on sub)
             let abs_x_18: int<18> = if is_neg { 0 - sext(x_17) } else { sext(x_17) };
             let abs_x: int<17> = trunc(abs_x_18);
@@ -49,7 +49,7 @@ entity tanh_pwl_fu(
             // If original was negative, flip the result back.
             // 0 - abs_y produces int<18>.
             let y_18: int<18> = if is_neg { 0 - sext(abs_y) } else { sext(abs_y) };
-            
+
             // Truncate back to 16 bits for the Q1.15 result container.
             // Max result is ~0.75 (24576), which fits easily in int<16> (max 32767).
             let y_16: int<16> = trunc(y_18);
@@ -57,7 +57,7 @@ entity tanh_pwl_fu(
             // Sign-extend int<16> to int<32> to preserve value on 32-bit bus,
             // then bitcast to uint<32> for the interface.
             let y_i32: int<32> = sext(y_16);
-            Some(y_i32.to_uint())
+            Some(y_i32.as_uint())
         },
         None => None
     };
@@ -67,9 +67,9 @@ entity tanh_pwl_fu(
 
 // Bus helper
 
-fn pick_trig(m0: Option<Msg>, m1: Option<Msg>) -> Option<uint<32>> {
+pub fn pick_trig(m0: Option<Msg>, m1: Option<Msg>) -> Option<uint<32>> {
     match m1 {
         Some(Msg::TNH_Trig(a)) => Some(a),
         _ => match m0 { Some(Msg::TNH_Trig(a)) => Some(a), _ => None }
     }
-} 
+}

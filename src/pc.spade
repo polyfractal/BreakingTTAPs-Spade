@@ -1,5 +1,5 @@
 
-use tta::tta::Msg;
+use lib::tta::Msg;
 
 //============================================================
 // Program Counter unit
@@ -7,13 +7,13 @@ use tta::tta::Msg;
 // - Writing PC_Trig with a value causes a jump (next cycle)
 // - If there is a conditional jump at the same time, that takes precedence
 //============================================================
-entity pc_fu(
+pub entity pc_fu(
   clk: clock, rst: bool,
   jump_to: Option<uint<10>>,
-  bt: &Option<uint<10>>     // read port from branch-if-true FU
+  bt: Option<uint<10>>      // read port from branch-if-true FU
 ) -> uint<10>
 {
-    reg(clk) pc: uint<10> reset(rst: 0) = match (*bt, jump_to) {
+    reg(clk) pc: uint<10> reset(rst: 0) = match (bt, jump_to) {
         (Some(bt_target), _)    => bt_target,       // conditional branch-if-true first
         (None, Some(pc_target)) => pc_target,       // then unconditional
         (None, None)            => trunc(pc + 1)    // otherwise increment
@@ -22,9 +22,9 @@ entity pc_fu(
 }
 
 // Bus helper
-fn pick_pc_jump(m0: Option<Msg>, m1: Option<Msg>) -> Option<uint<10>> {
+pub fn pick_pc_jump(m0: Option<Msg>, m1: Option<Msg>) -> Option<uint<10>> {
     match m1 {
         Some(Msg::PC_Jump(a)) => Some(a),
         _ => match m0 { Some(Msg::PC_Jump(a)) => Some(a), _ => None }
     }
-} 
+}

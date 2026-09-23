@@ -1,4 +1,4 @@
-use tta::tta::Msg;
+use lib::tta::Msg;
 
 //============================================================
 // Modulo-Add Functional Unit
@@ -7,7 +7,7 @@ use tta::tta::Msg;
 // - Handy for circular buffer math
 //============================================================
 
-entity modadd_fu(
+pub entity modadd_fu(
     clk: clock,
     rst: bool,
     set_base:    Option<uint<32>>, // Config: Base Address
@@ -66,30 +66,30 @@ entity modadd_fu(
 
 // Bus helpers
 
-fn pick_base(m0: Option<Msg>, m1: Option<Msg>) -> Option<uint<32>> {
+pub fn pick_base(m0: Option<Msg>, m1: Option<Msg>) -> Option<uint<32>> {
     match m1 {
         Some(Msg::MDA_Base(a)) => Some(a),
         _ => match m0 { Some(Msg::MDA_Base(a)) => Some(a), _ => None }
     }
-} 
+}
 
-fn pick_mask(m0: Option<Msg>, m1: Option<Msg>) -> Option<uint<32>> {
+pub fn pick_mask(m0: Option<Msg>, m1: Option<Msg>) -> Option<uint<32>> {
     match m1 {
         Some(Msg::MDA_Mask(a)) => Some(a),
         _ => match m0 { Some(Msg::MDA_Mask(a)) => Some(a), _ => None }
     }
-} 
+}
 
-fn pick_ptr(m0: Option<Msg>, m1: Option<Msg>) -> Option<uint<32>> {
+pub fn pick_ptr(m0: Option<Msg>, m1: Option<Msg>) -> Option<uint<32>> {
     match m1 {
         Some(Msg::MDA_Ptr(a)) => Some(a),
         _ => match m0 { Some(Msg::MDA_Ptr(a)) => Some(a), _ => None }
     }
-} 
+}
 
-fn pick_trig(m0: Option<Msg>, m1: Option<Msg>) -> Option<uint<32>> {
+pub fn pick_trig(m0: Option<Msg>, m1: Option<Msg>) -> Option<uint<32>> {
     match m1 {
         Some(Msg::MDA_Trig(a)) => Some(a),
         _ => match m0 { Some(Msg::MDA_Trig(a)) => Some(a), _ => None }
     }
-} 
+}

@@ -39,18 +39,18 @@ struct UartOutput {
     tx_busy: bool
 }
 
-entity uart_fu(
+pub entity uart_fu(
     clk: clock,
     rst: bool,
     tick16: bool,              // 16x Baud Rate Pulse
-    rx_in: &bool,               // RX Pin
-    tx_data: &Option<uint<8>>   // Data to Transmit
-) -> UartOutput 
+    rx_in: bool,               // RX Pin
+    tx_data: Option<uint<8>>   // Data to Transmit
+) -> UartOutput
 {
     // -----------------------------------------------------------------
     // UART Transmitter (TX)
     // -----------------------------------------------------------------
-    
+
     reg(clk) tx: UartTx reset(rst: UartTx(TxState::Idle, 0, 0, 0)) = {
         // Only advance logic on tick16 pulse
         if tick16 {
@@ -59,7 +59,7 @@ entity uart_fu(
 
             match tx.state {
                 TxState::Idle => {
-                    match *tx_data {
+                    match tx_data {
                         Some(data) => {
                             // Load data directly. LSB is at index 0.
                             // Start bit is handled by state transition output.
@@ -107,7 +107,7 @@ entity uart_fu(
         TxState::Data => (tx.sh & 1) != 0, // LSB First
         TxState::Stop => true    // Stop High
     };
-    
+
     let tx_busy = match tx.state {
         TxState::Idle => false,
         _ => true
@@ -117,7 +117,7 @@ entity uart_fu(
     // -----------------------------------------------------------------
     // UART Receiver (RX)
     // -----------------------------------------------------------------
-    reg(clk) rx_sync1: bool reset(rst: true) = *rx_in;
+    reg(clk) rx_sync1: bool reset(rst: true) = rx_in;
     reg(clk) rx_sync2: bool reset(rst: true) = rx_sync1;
     let rxd = rx_sync2;
 
@@ -143,12 +143,12 @@ entity uart_fu(
                     }
                 },
                 RxState::Data => {
-                    if rx.tick_cnt == 15 { 
-                        // Shift in LSB first logic: 
+                    if rx.tick_cnt == 15 {
+                        // Shift in LSB first logic:
                         // New bit goes to MSB, old bits shift right.
                         // After 8 shifts, Bit0 is at LSB.
                         let next_sh = (rx.sh >> 1) | (if rxd { 0x80 } else { 0 });
-                        
+
                         if rx.bit_cnt == 7 {
                             UartRx(RxState::Stop, next_sh, 0, 0)
                         } else {
@@ -178,7 +178,7 @@ entity uart_fu(
         RxState::Stop => rx.tick_cnt == 15,
         _ => false
     };
-    
+
     let rx_data = if rx_valid { Some(rx.sh) } else { None };
 
     UartOutput(tx_out, rx_data, tx_busy)

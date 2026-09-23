@@ -1,7 +1,7 @@
-use tta::tta::Instr;
-use tta::tta::Move;
-use tta::tta::Src;
-use tta::tta::Dst;
+use lib::tta::Instr;
+use lib::tta::Move;
+use lib::tta::Src;
+use lib::tta::Dst;
 
 //============================================================
 // boot_imem_subsystem
@@ -9,23 +9,23 @@ use tta::tta::Dst;
 //   and serves decoded instructions to the core.
 // - Holds the core in reset while booting and emits a one-shot
 //   PC release pulse with the entry address when done.
-//   Pretty sure PC release value is incorrect/ buggy and should be ignored 
+//   Pretty sure PC release value is incorrect/ buggy and should be ignored
 //============================================================
 
-struct SubsysOut {
+pub struct SubsysOut {
   core_rst:   bool,             // rst || boot_active
   instr:      Instr,            // decoded instruction at fetch_pc (1c latency from IMEM)
   pc_release: Option<uint<10>>  // TODO this isn't really used anymore, should remove
 }
 
-entity boot_imem_sub(
+pub entity boot_imem_sub(
   clk: clock, rst: bool,
 
   // UART or SPI data
   rx_opt: Option<uint<8>>,
 
   // From core
-  fetch_pc:   &uint<10>  // program counter for instruction fetch
+  fetch_pc:   uint<10>   // program counter for instruction fetch
 ) -> SubsysOut
 {
 
@@ -38,7 +38,7 @@ entity boot_imem_sub(
 
   // ---------------- Bootloader ----------------
   // Produces 1-cycle pulses for IMEM writes and keeps CPU in reset until Done.
-  let bl = inst tta::bootloader::bootloader(clk, rst, byte_valid, byte);
+  let bl = inst lib::bootloader::bootloader(clk, rst, byte_valid, byte);
 
   // Core reset gating
   let core_rst = rst || bl.boot_active;
@@ -57,12 +57,12 @@ entity boot_imem_sub(
   // Boot writes go straight in; in run mode we present fetch_pc.
   // NOTE: imem has a 1-cycle read latency on fetch path.
   let instr = match boot_q {
-    true => no_op(),  
+    true => no_op(),
     false => {
-      match inst tta::imem::imem(
+      match inst lib::imem::imem(
           clk, rst,
           boot_q,        // boot_mode
-          *fetch_pc,     // read address (from core)
+          fetch_pc,      // read address (from core)
           bl.wr_addr, bl.wr_slot0, bl.wr_slot1
         ) {
           Some(v) => v,

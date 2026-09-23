@@ -1,12 +1,12 @@
 
-use tta::alu::AluOp;
-use tta::bit::BitOp;
-use tta::cmp::CmpOp;
-use tta::cmpz::CmpzOp;
-use tta::lalu::LAluOp;
+use lib::alu::AluOp;
+use lib::bit::BitOp;
+use lib::cmp::CmpOp;
+use lib::cmpz::CmpzOp;
+use lib::lalu::LAluOp;
 
 // Sources you can read on the bus
-enum Src {
+pub enum Src {
   RegisterFile{idx: uint<4>}, // register file
   ALU_Res,                    // ALU result
   LALU_Res,                   // Lightweight ALU result
@@ -26,7 +26,7 @@ enum Src {
   SPI_In8,                    // SPI RX
   DIV_Res,                    // Division result
   Xorshift_Res,               // PRNG result
-  MAC_Res,                    // Multiply and Accumulate result 
+  MAC_Res,                    // Multiply and Accumulate result
   SEL_Res,                    // Conditional Move result
   MDA_Res,                    // Modulo Add result
   TNH_Res,                    // TanH Result
@@ -35,13 +35,13 @@ enum Src {
 }
 
 // Destinations you can write to the bus
-enum Dst {
-  RegisterFile{idx: uint<4>},     
-  ALU_OpA,                  
-  ALU_Add_Trig,             
-  ALU_Sub_Trig,             
-  ALU_And_Trig,              
-  ALU_Or_Trig,         
+pub enum Dst {
+  RegisterFile{idx: uint<4>},
+  ALU_OpA,
+  ALU_Add_Trig,
+  ALU_Sub_Trig,
+  ALU_And_Trig,
+  ALU_Or_Trig,
   ALU_Not_Trig,
   ALU_Xor_Trig,
   ALU_Shl_Trig,
@@ -66,22 +66,22 @@ enum Dst {
   BIT_Brev_Trig,
 
   LALU_OpA,
-  LALU_Add_Trig,           
+  LALU_Add_Trig,
   LALU_Sub_Trig,
 
-  PC_Trig,                    // write new PC (jump) — triggers next fetch from here
-  
+  PC_Trig,                    // write new PC (jump) - triggers next fetch from here
+
   BT_Target,
-  BT_Trig,                  
-  
-  LSU_AddrA, 
-  LSU_Load_Trig, 
+  BT_Trig,
+
+  LSU_AddrA,
+  LSU_Load_Trig,
   LSU_Store_Trig,
 
-  LSU2_AddrA, 
-  LSU2_Load_Trig, 
+  LSU2_AddrA,
+  LSU2_Load_Trig,
   LSU2_Store_Trig,
-  
+
   GPO_Out,
 
   Cmp_OpA,
@@ -91,7 +91,7 @@ enum Dst {
   Cmp_Sle_Trig,
   Cmp_Ult_Trig,
   Cmp_Ule_Trig,
-  
+
   Cmpz_Eqz_Trig,
   Cmpz_Neqz_Trig,
   Cmpz_Sltz_Trig,
@@ -133,28 +133,28 @@ enum Dst {
 }
 
 // One data move scheduled on a bus (optionally executed / guarded)
-struct Move {
+pub struct Move {
   src:   Src,
   dst:   Dst,
   execute: bool
 }
 
 // Instruction word = one move per bus/slot
-struct Instr {
+pub struct Instr {
   slot0: Move,
   slot1: Move
 }
 
-enum Msg {
+pub enum Msg {
     RF_Write{idx: uint<4>, data: uint<32>},
     ALU_SetA{val: uint<32>},
     ALU_Trig{op: AluOp, valB: uint<32>},
     PC_Jump{addr: uint<10>},
-    LSU_SetA{val: uint<32>}, 
-    LSU_Load_Trig{val: uint<32>}, 
+    LSU_SetA{val: uint<32>},
+    LSU_Load_Trig{val: uint<32>},
     LSU_Store_Trig{val: uint<32>},
-    LSU2_SetA{val: uint<32>}, 
-    LSU2_Load_Trig{val: uint<32>}, 
+    LSU2_SetA{val: uint<32>},
+    LSU2_Load_Trig{val: uint<32>},
     LSU2_Store_Trig{val: uint<32>},
     GPO_Out{val: uint<16>},
     Cmp_SetA{val: uint<32>},
@@ -162,19 +162,19 @@ enum Msg {
     Cmpz_Trig{op: CmpzOp, valB: uint<32>},
     LALU_SetA{val: uint<32>},
     LALU_Trig{op: LAluOp, valB: uint<32>},
-    MUL_SetA{val: uint<32>}, 
-    MUL_Trig{val: uint<32>}, 
+    MUL_SetA{val: uint<32>},
+    MUL_Trig{val: uint<32>},
     BT_Target{addr: uint<10>},
     BT_Trig{addr: uint<32>},
     SPI_Out8{addr: uint<8>},
-    DIV_SetA{val: uint<32>}, 
+    DIV_SetA{val: uint<32>},
     DIV_Trig{val: uint<32>},
-    Xorshift_Trig{val: uint<32>}, 
-    MAC_SetA{val: uint<32>}, 
-    MAC_Trig{val: uint<32>}, 
+    Xorshift_Trig{val: uint<32>},
+    MAC_SetA{val: uint<32>},
+    MAC_Trig{val: uint<32>},
     MAC_Clear{val: bool},
-    SEL_Cond{val: bool}, 
-    SEL_SetA{val: uint<32>}, 
+    SEL_Cond{val: bool},
+    SEL_SetA{val: uint<32>},
     SEL_TrigB{val: uint<32>},
     MDA_Base{val: uint<32>},
     MDA_Mask{val: uint<32>},
@@ -241,7 +241,7 @@ fn decode_move(dst: Dst, v: Option<uint<32>>) -> Option<Msg> {
         (Dst::LSU2_Store_Trig,  Some(x)) => Some(Msg::LSU2_Store_Trig(x)),
 
         (Dst::GPO_Out,         Some(x)) => Some(Msg::GPO_Out(trunc(x))),
-        
+
         (Dst::Cmp_OpA,         Some(x)) => Some(Msg::Cmp_SetA(x)),
         (Dst::Cmp_Eq_Trig,     Some(x)) => Some(Msg::Cmp_Trig(CmpOp::Eq, x)),
         (Dst::Cmp_Neq_Trig,    Some(x)) => Some(Msg::Cmp_Trig(CmpOp::Neq, x)),
@@ -297,7 +297,7 @@ fn decode_move(dst: Dst, v: Option<uint<32>>) -> Option<Msg> {
 // Most of this is debug output
 struct TTA_Tick {
     pc_val: uint<10>,
-    alu_a_comb: Option<uint<32>>,     
+    alu_a_comb: Option<uint<32>>,
     alu_t_comb: Option<(AluOp, uint<32>)>,
     alu_res: Option<uint<32>>,
     pc_jump_comb: Option<uint<10>>,
@@ -314,16 +314,16 @@ struct TTA_Tick {
     //state: StateDebug,
 }
 
-entity tta(clk: clock, 
-    rst: bool, 
+pub entity tta(clk: clock,
+    rst: bool,
     insn: Instr,                // decoded instruction from IMEM
-    pc_w: inv &uint<10>,         // PC write port 
+    pc_w: inv uint<10>,         // PC write port
     gpi16: uint<16>,
     uart_rx: Option<uint<8>>,
-    uart_tx: inv &Option<uint<8>>,
+    uart_tx: inv Option<uint<8>>,
     uart_tx_busy: bool,
     spi_miso: Option<uint<8>>,
-    spi_mosi: inv &Option<uint<8>>,
+    spi_mosi: inv Option<uint<8>>,
     spi_busy: bool,
 ) -> TTA_Tick
 {
@@ -332,117 +332,117 @@ entity tta(clk: clock,
 
     // ---------- Functional Units ----------
     // --- Program Counter
-    let (bt_target_r, bt_target_w) = port;
+    let (bt_target_r, bt_target_w) = port();
 
     decl pc_jump_final;
-    let pc_val  = inst tta::pc::pc_fu(clk, rst, pc_jump_final, bt_target_r);
-    set pc_w = &pc_val;   // wire up the PC to external IMEM
+    let pc_val  = inst lib::pc::pc_fu(clk, rst, pc_jump_final, bt_target_r);
+    set pc_w = pc_val;   // wire up the PC to external IMEM
 
     decl bt_target;
     decl bt_trig;
-    let bt_val  = inst tta::bt::bt_fu(clk, rst, bt_target, bt_trig);
-    set bt_target_w = &bt_val;   // wire up the output of branch-if-true to the PC above
-    
-    // --- Simple arithmetic 
+    let bt_val  = inst lib::bt::bt_fu(clk, rst, bt_target, bt_trig);
+    set bt_target_w = bt_val;   // wire up the output of branch-if-true to the PC above
+
+    // --- Simple arithmetic
     decl alu_op_a;
     decl alu_trig;
-    let alu_res = inst tta::alu::alu_fu(clk, rst, alu_op_a, alu_trig);
+    let alu_res = inst lib::alu::alu_fu(clk, rst, alu_op_a, alu_trig);
 
-    // --- Bit manip 
+    // --- Bit manip
     decl bit_op_a;
     decl bit_trig;
-    let bit_res = inst tta::bit::bit_fu(clk, rst, bit_op_a, bit_trig);
+    let bit_res = inst lib::bit::bit_fu(clk, rst, bit_op_a, bit_trig);
 
-    // --- Lightweight ALU (only add/sub) 
+    // --- Lightweight ALU (only add/sub)
     decl lalu_op_a;
     decl lalu_trig;
-    let lalu_res = inst tta::lalu::lalu_fu(clk, rst, lalu_op_a, lalu_trig);
+    let lalu_res = inst lib::lalu::lalu_fu(clk, rst, lalu_op_a, lalu_trig);
 
     // --- Shift-Add Multiplier
     decl mul_set_addr;
     decl mul_trig;
-    let mul_res = inst tta::mul_shiftadd::mul_shiftadd_fu(clk, rst, mul_set_addr, mul_trig);
+    let mul_res = inst lib::mul_shiftadd::mul_shiftadd_fu(clk, rst, mul_set_addr, mul_trig);
 
     // --- Shift-Sub Division
     decl div_set_addr;
     decl div_trig;
-    let div_res = inst tta::div_shiftsub::div_shiftsub_fu(clk, rst, div_set_addr, div_trig);
+    let div_res = inst lib::div_shiftsub::div_shiftsub_fu(clk, rst, div_set_addr, div_trig);
 
-    // --- Compare 
+    // --- Compare
     decl cmp_op_a;
     decl cmp_trig;
-    let cmp_res = inst tta::cmp::cmp_fu(clk, rst, cmp_op_a, cmp_trig);
+    let cmp_res = inst lib::cmp::cmp_fu(clk, rst, cmp_op_a, cmp_trig);
 
     // --- CompareZ
     decl cmpz_trig;
-    let cmpz_res = inst tta::cmpz::cmpz_fu(clk, rst, cmpz_trig);
+    let cmpz_res = inst lib::cmpz::cmpz_fu(clk, rst, cmpz_trig);
 
     // --- Load/Store
     decl lsu_set_addr;
     decl lsu_load_trig;
     decl lsu_store_trig;
-    let lsu_res = inst tta::lsu::lsu_fu(clk, rst, lsu_set_addr, lsu_load_trig, lsu_store_trig);
+    let lsu_res = inst lib::lsu::lsu_fu(clk, rst, lsu_set_addr, lsu_load_trig, lsu_store_trig);
 
     // --- Load/Store Second Instance
     decl lsu2_set_addr;
     decl lsu2_load_trig;
     decl lsu2_store_trig;
-    let lsu2_res = inst tta::lsu::lsu_fu(clk, rst, lsu2_set_addr, lsu2_load_trig, lsu2_store_trig);
+    let lsu2_res = inst lib::lsu::lsu_fu(clk, rst, lsu2_set_addr, lsu2_load_trig, lsu2_store_trig);
 
     // --- TanH
     decl tanh_trig;
-    let tanh_res = inst tta::tanh::tanh_pwl_fu(clk, rst, tanh_trig);
+    let tanh_res = inst lib::tanh::tanh_pwl_fu(clk, rst, tanh_trig);
 
     // --- Clock Counter
-    let (cc_res_lo, cc_res_high) = inst tta::cc::cc_fu(clk, rst);
+    let (cc_res_lo, cc_res_high) = inst lib::cc::cc_fu(clk, rst);
 
     // --- Xorshift PRNG
     decl xorshift_trig;
-    let xorshift_res = inst tta::xorshift::xorshift_fu(clk, rst, xorshift_trig);
-    
+    let xorshift_res = inst lib::xorshift::xorshift_fu(clk, rst, xorshift_trig);
+
     // --- MAC
     decl mac_set_addr;
     decl mac_trig;
     decl mac_clear;
-    let mac_res = inst tta::mac::mac_fu(clk, rst, mac_set_addr, mac_trig, mac_clear);
+    let mac_res = inst lib::mac::mac_fu(clk, rst, mac_set_addr, mac_trig, mac_clear);
 
     // --- SEL
     decl sel_cond;
     decl sel_seta;
     decl sel_trigb;
-    let sel_res = inst tta::sel::sel_fu(clk, rst, sel_cond, sel_seta, sel_trigb);
+    let sel_res = inst lib::sel::sel_fu(clk, rst, sel_cond, sel_seta, sel_trigb);
 
-    // --- Modulo Add 
+    // --- Modulo Add
     decl mda_base;
     decl mda_mask;
     decl mda_ptr;
     decl mda_trig;
-    let mda_res = inst tta::modadd::modadd_fu(clk, rst, mda_base, mda_mask, mda_ptr, mda_trig);
+    let mda_res = inst lib::modadd::modadd_fu(clk, rst, mda_base, mda_mask, mda_ptr, mda_trig);
 
     // --- Program Stack
     decl stack_setaddr;
     decl stack_push;
     decl stack_pop;
-    let stack_res = inst tta::stack_lsu::stack_lsu_fu(clk, rst, stack_setaddr, stack_pop, stack_push);
+    let stack_res = inst lib::stack_lsu::stack_lsu_fu(clk, rst, stack_setaddr, stack_pop, stack_push);
 
     // --- General purpose output pins
     decl gpo_trig;
-    let gpo_res = inst tta::gpo::gpo16(clk, rst, gpo_trig);
+    let gpo_res = inst lib::gpo::gpo16(clk, rst, gpo_trig);
 
     // --- General purpose input pins
-    let gpi_res = inst tta::gpi::gpi16(clk, rst, gpi16);
+    let gpi_res = inst lib::gpi::gpi16(clk, rst, gpi16);
 
     // --- UART input data
     decl uart_inpop_trig;
-    let uart_in_res = inst tta::uart_in::uart_in(clk, rst, uart_rx, uart_inpop_trig);
+    let uart_in_res = inst lib::uart_in::uart_in(clk, rst, uart_rx, uart_inpop_trig);
     decl uart_out8_trig;
-    let _ = inst tta::uart_in::uart_out(clk, rst, uart_out8_trig, uart_tx, uart_tx_busy);
+    let _ = inst lib::uart_in::uart_out(clk, rst, uart_out8_trig, uart_tx, uart_tx_busy);
 
     // --- SPI IO
     decl spi_inpop_trig;
-    let spi_in_res = inst tta::spi::spi_in(clk, rst, spi_miso, spi_inpop_trig);
+    let spi_in_res = inst lib::spi::spi_in(clk, rst, spi_miso, spi_inpop_trig);
     decl spi_out8_trig;
-    let _ = inst tta::spi::spi_out8(clk, rst, spi_out8_trig, spi_mosi, spi_busy);
+    let _ = inst lib::spi::spi_out8(clk, rst, spi_out8_trig, spi_mosi, spi_busy);
 
     // --- Register file
     // Extract register file read indices for both slots (default 0 when not used)
@@ -452,10 +452,10 @@ entity tta(clk: clock,
 
     decl rf_w0;
     decl rf_w1;
-    let registry = inst tta::regfile::regfile8_fu(clk, rst, rf_w0, rf_w1, ra0, ra1);
+    let registry = inst lib::regfile::regfile8_fu(clk, rst, rf_w0, rf_w1, ra0, ra1);
 
     // ---------- Build bus values ----------
-    
+
     let bus0_val_opt: Option<uint<32>> =
         if insn.slot0.execute {
             match insn.slot0.src {
@@ -524,70 +524,70 @@ entity tta(clk: clock,
 
     // ---------- Route messages to units ----------
     // RF can accept two writes; map m0->wr0 and m1->wr1 when applicable.
-    let rf_w0 = tta::regfile::route_rf_one(m0);
-    let rf_w1 = tta::regfile::route_rf_one(m1);
+    let rf_w0 = lib::regfile::route_rf_one(m0);
+    let rf_w1 = lib::regfile::route_rf_one(m1);
 
-    let alu_op_a = tta::alu::pick_alu_seta(m0, m1);
-    let alu_trig = tta::alu::pick_alu_trig(m0, m1);
+    let alu_op_a = lib::alu::pick_alu_seta(m0, m1);
+    let alu_trig = lib::alu::pick_alu_trig(m0, m1);
 
-    let bit_op_a = tta::bit::pick_bit_seta(m0, m1);
-    let bit_trig = tta::bit::pick_bit_trig(m0, m1);
-    
-    let lalu_op_a = tta::lalu::pick_lalu_seta(m0, m1);
-    let lalu_trig = tta::lalu::pick_lalu_trig(m0, m1);
+    let bit_op_a = lib::bit::pick_bit_seta(m0, m1);
+    let bit_trig = lib::bit::pick_bit_trig(m0, m1);
 
-    let mul_set_addr = tta::mul_shiftadd::pick_mul_seta(m0, m1);
-    let mul_trig = tta::mul_shiftadd::pick_mul_trig(m0, m1);
+    let lalu_op_a = lib::lalu::pick_lalu_seta(m0, m1);
+    let lalu_trig = lib::lalu::pick_lalu_trig(m0, m1);
 
-    let div_set_addr = tta::div_shiftsub::pick_div_seta(m0, m1);
-    let div_trig = tta::div_shiftsub::pick_div_trig(m0, m1);
+    let mul_set_addr = lib::mul_shiftadd::pick_mul_seta(m0, m1);
+    let mul_trig = lib::mul_shiftadd::pick_mul_trig(m0, m1);
 
-    let cmp_op_a = tta::cmp::pick_cmp_seta(m0, m1);
-    let cmp_trig = tta::cmp::pick_cmp_trig(m0, m1);
+    let div_set_addr = lib::div_shiftsub::pick_div_seta(m0, m1);
+    let div_trig = lib::div_shiftsub::pick_div_trig(m0, m1);
 
-    let cmpz_trig = tta::cmpz::pick_cmpz_trig(m0, m1);
+    let cmp_op_a = lib::cmp::pick_cmp_seta(m0, m1);
+    let cmp_trig = lib::cmp::pick_cmp_trig(m0, m1);
 
-    let pc_jump_final = tta::pc::pick_pc_jump(m0, m1);
+    let cmpz_trig = lib::cmpz::pick_cmpz_trig(m0, m1);
 
-    let bt_target = tta::bt::pick_bt_target(m0, m1);
-    let bt_trig = tta::bt::pick_bt_trig(m0, m1);
+    let pc_jump_final = lib::pc::pick_pc_jump(m0, m1);
 
-    let lsu_set_addr = tta::lsu::pick_lsu_seta(m0, m1);
-    let lsu_load_trig = tta::lsu::pick_lsu_loadtrig(m0, m1);
-    let lsu_store_trig = tta::lsu::pick_lsu_storetrig(m0, m1);
+    let bt_target = lib::bt::pick_bt_target(m0, m1);
+    let bt_trig = lib::bt::pick_bt_trig(m0, m1);
 
-    let lsu2_set_addr = tta::lsu::pick_lsu2_seta(m0, m1);
-    let lsu2_load_trig = tta::lsu::pick_lsu2_loadtrig(m0, m1);
-    let lsu2_store_trig = tta::lsu::pick_lsu2_storetrig(m0, m1);
+    let lsu_set_addr = lib::lsu::pick_lsu_seta(m0, m1);
+    let lsu_load_trig = lib::lsu::pick_lsu_loadtrig(m0, m1);
+    let lsu_store_trig = lib::lsu::pick_lsu_storetrig(m0, m1);
 
-    let xorshift_trig = tta::xorshift::pick_xorshift_trig(m0, m1);
+    let lsu2_set_addr = lib::lsu::pick_lsu2_seta(m0, m1);
+    let lsu2_load_trig = lib::lsu::pick_lsu2_loadtrig(m0, m1);
+    let lsu2_store_trig = lib::lsu::pick_lsu2_storetrig(m0, m1);
 
-    let mac_set_addr = tta::mac::pick_mac_seta(m0, m1);
-    let mac_trig = tta::mac::pick_mac_trig(m0, m1);
-    let mac_clear = tta::mac::pick_mac_clear(m0, m1);
+    let xorshift_trig = lib::xorshift::pick_xorshift_trig(m0, m1);
 
-    let sel_cond = tta::sel::pick_sel_cond(m0, m1);
-    let sel_seta = tta::sel::pick_sel_seta(m0, m1);
-    let sel_trigb = tta::sel::pick_sel_trigb(m0, m1);
+    let mac_set_addr = lib::mac::pick_mac_seta(m0, m1);
+    let mac_trig = lib::mac::pick_mac_trig(m0, m1);
+    let mac_clear = lib::mac::pick_mac_clear(m0, m1);
 
-    let mda_base = tta::modadd::pick_base(m0, m1);
-    let mda_mask = tta::modadd::pick_mask(m0, m1);
-    let mda_ptr = tta::modadd::pick_ptr(m0, m1);
-    let mda_trig = tta::modadd::pick_trig(m0, m1);
+    let sel_cond = lib::sel::pick_sel_cond(m0, m1);
+    let sel_seta = lib::sel::pick_sel_seta(m0, m1);
+    let sel_trigb = lib::sel::pick_sel_trigb(m0, m1);
 
-    let tanh_trig = tta::tanh::pick_trig(m0, m1);
+    let mda_base = lib::modadd::pick_base(m0, m1);
+    let mda_mask = lib::modadd::pick_mask(m0, m1);
+    let mda_ptr = lib::modadd::pick_ptr(m0, m1);
+    let mda_trig = lib::modadd::pick_trig(m0, m1);
 
-    let stack_setaddr = tta::stack_lsu::pick_seta(m0, m1);
-    let stack_push = tta::stack_lsu::pick_push_trig(m0, m1);
-    let stack_pop = tta::stack_lsu::pick_pop_trig(m0, m1);
+    let tanh_trig = lib::tanh::pick_trig(m0, m1);
 
-    let gpo_trig = tta::gpo::pick_gpo16(m0, m1);
+    let stack_setaddr = lib::stack_lsu::pick_seta(m0, m1);
+    let stack_push = lib::stack_lsu::pick_push_trig(m0, m1);
+    let stack_pop = lib::stack_lsu::pick_pop_trig(m0, m1);
 
-    let spi_out8_trig = tta::spi::pick_spi_out8(m0, m1);
-    let spi_inpop_trig = tta::spi::pick_spi_inpop(m0, m1);
+    let gpo_trig = lib::gpo::pick_gpo16(m0, m1);
 
-    let uart_out8_trig = tta::uart_in::pick_uart_out8(m0, m1);
-    let uart_inpop_trig = tta::uart_in::pick_uart_inpop(m0, m1);
+    let spi_out8_trig = lib::spi::pick_spi_out8(m0, m1);
+    let spi_inpop_trig = lib::spi::pick_spi_inpop(m0, m1);
+
+    let uart_out8_trig = lib::uart_in::pick_uart_out8(m0, m1);
+    let uart_inpop_trig = lib::uart_in::pick_uart_inpop(m0, m1);
 
     let pc_jump_comb = pc_jump_final;
     let rd0          = registry.rd0;
@@ -612,8 +612,8 @@ entity tta(clk: clock,
     let r15 = registry.r15;
 
     /*
-    let state = StateDebug $(
-        rf_w0, rf_w1, 
+    let state = StateDebug {
+        rf_w0, rf_w1,
         r0, r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, r12, r13, r14, r15,
 
         alu_op_a, alu_trig, alu_res,
@@ -635,7 +635,7 @@ entity tta(clk: clock,
         gpo_trig,
         spi_out8_trig, spi_inpop_trig,
         uart_out8_trig, uart_inpop_trig,
-    );
+    };
     */
 
     TTA_Tick(
@@ -764,7 +764,7 @@ struct StateDebug {
 
     // IO
     gpo_trig: Option<uint<16>>,
-    
+
     spi_out8_trig: Option<uint<8>>,
     spi_inpop_trig: bool,
 

@@ -31,7 +31,7 @@ async def test_reset(dut):
 
     s.i.rst = True
     s.i.jump_to = "None"
-    s.i.bt = "&None"
+    s.i.bt = "None"
     await FallingEdge(clk)
     s.o.assert_eq(0)
 
@@ -50,7 +50,7 @@ async def test_jump(dut):
 
     s.i.rst = True
     s.i.jump_to = "None"
-    s.i.bt = "&None"
+    s.i.bt = "None"
     await FallingEdge(clk)
     s.o.assert_eq(0)
 
@@ -58,7 +58,7 @@ async def test_jump(dut):
     s.i.jump_to = "Some(10)"
     await FallingEdge(clk)
     s.o.assert_eq(10)
-    
+
 @cocotb.test()
 async def test_jump_then_clock(dut):
     """pc_counter is 11 after jump and clock"""
@@ -74,7 +74,7 @@ async def test_jump_then_clock(dut):
 
     s.i.rst = True
     s.i.jump_to = "None"
-    s.i.bt = "&None"
+    s.i.bt = "None"
     await FallingEdge(clk)
     s.o.assert_eq(0)
 

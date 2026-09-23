@@ -1,4 +1,4 @@
-use tta::tta::Msg;
+use lib::tta::Msg;
 
 //============================================================
 // UART input FU
@@ -6,15 +6,15 @@ use tta::tta::Msg;
 // I have little faith that this works :(
 //============================================================
 
-entity uart_in(
+pub entity uart_in(
   clk: clock, rst: bool,
   uart_byte: Option<uint<8>>,
-  pop: bool    
-) -> Option<uint<32>>           
+  pop: bool
+) -> Option<uint<32>>
 {
     // Small FIFO queue to help buffer data
 
-    let data = inst tta::fifo::fifo_u8(clk, rst, uart_byte, pop);
+    let data = inst lib::fifo::fifo_u8(clk, rst, uart_byte, pop);
     reg(clk) data: Option<uint<32>> reset(rst: None) = match data {
       Some(b) => Some(zext(b)),
       None => None
@@ -25,42 +25,42 @@ entity uart_in(
 }
 
 
-entity uart_out(
+pub entity uart_out(
   clk: clock, rst: bool,
   byte_to_write: Option<uint<8>> ,
-  tx: inv &Option<uint<8>>,  
-  uart_tx_busy: bool       
-) -> ()         
+  tx: inv Option<uint<8>>,
+  uart_tx_busy: bool
+) -> ()
 {
     // Small FIFO queue to help buffer data
     // if uart_byte is_some(), it will get pushed onto the queue
     // if there is any data (including current byte), pop
 
-    let data = inst tta::fifo::fifo_u8(clk, rst, byte_to_write, !uart_tx_busy);   // only pop if UART isn't busy
+    let data = inst lib::fifo::fifo_u8(clk, rst, byte_to_write, !uart_tx_busy);   // only pop if UART isn't busy
     reg(clk) data: Option<uint<8>> reset(rst: None) = match data {
       Some(b) => Some(b),
       None => None
     };
 
-    set tx = &data;
+    set tx = data;
 }
 
 // Bus helper
 
-fn pick_uart_inpop(m0: Option<Msg>, m1: Option<Msg>) -> bool {
+pub fn pick_uart_inpop(m0: Option<Msg>, m1: Option<Msg>) -> bool {
     match m1 {
         Some(Msg::UART_InPop_Trig) => true,
-        _ => match m0 { 
-            Some(Msg::UART_InPop_Trig) => true, 
+        _ => match m0 {
+            Some(Msg::UART_InPop_Trig) => true,
             _ => false }
     }
 }
 
-fn pick_uart_out8(m0: Option<Msg>, m1: Option<Msg>) -> Option<uint<8>> {
+pub fn pick_uart_out8(m0: Option<Msg>, m1: Option<Msg>) -> Option<uint<8>> {
     match m1 {
         Some(Msg::UART_Out8(x)) => Some(x),
-        _ => match m0 { 
-            Some(Msg::UART_Out8(x)) => Some(x), 
+        _ => match m0 {
+            Some(Msg::UART_Out8(x)) => Some(x),
             _ => None }
     }
 }

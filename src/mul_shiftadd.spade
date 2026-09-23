@@ -1,8 +1,8 @@
-use tta::tta::Msg;
+use lib::tta::Msg;
 
 //============================================================
 // Mul - shift add multiplier FU
-// 
+//
 // - OpA holds multiplicand
 // - Trigger with multiplier.
 // - Latency: 32 Cycles
@@ -26,7 +26,7 @@ fn reset_mul() -> MulRegs {
     MulRegs(State::Idle, 0, 0, 0, 0)
 }
 
-entity mul_shiftadd_fu(
+pub entity mul_shiftadd_fu(
   clk: clock, rst: bool,
   set_op_a: Option<uint<32>>,
   trig:     Option<uint<32>>
@@ -55,7 +55,7 @@ entity mul_shiftadd_fu(
 
             let next_a = r.op_a << 1;
             let next_b = r.op_b >> 1;
-            
+
             if r.cnt == 31 {
                 // Finished 32 bits (0..31). Return to Idle.
                 reset_mul()
@@ -84,14 +84,14 @@ entity mul_shiftadd_fu(
 
 // Bus helpers
 
-fn pick_mul_seta(m0: Option<Msg>, m1: Option<Msg>) -> Option<uint<32>> {
+pub fn pick_mul_seta(m0: Option<Msg>, m1: Option<Msg>) -> Option<uint<32>> {
   match m1 {
     Some(Msg::MUL_SetA(x)) => Some(x),
     _ => match m0 { Some(Msg::MUL_SetA(x)) => Some(x), _ => None }
   }
 }
 
-fn pick_mul_trig(m0: Option<Msg>, m1: Option<Msg>) -> Option<uint<32>> {
+pub fn pick_mul_trig(m0: Option<Msg>, m1: Option<Msg>) -> Option<uint<32>> {
   match m1 {
     Some(Msg::MUL_Trig(x)) => Some(x),
     _ => match m0 { Some(Msg::MUL_Trig(x)) => Some(x), _ => None }

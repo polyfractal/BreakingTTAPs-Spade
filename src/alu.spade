@@ -1,4 +1,4 @@
-use tta::tta::Msg;
+use lib::tta::Msg;
 
 //============================================================
 // ALU functional unit
@@ -8,12 +8,12 @@ use tta::tta::Msg;
 // - Latency: 1 Cycle
 //============================================================
 
-enum AluOp { 
+pub enum AluOp {
     Add, Sub, And, Or, Not, Xor, Shl, Shr, Ashr, Rotl, Rotr, Min,
     Max, SSadd, SSsub, USadd, USsub
 }
 
-entity alu_fu(
+pub entity alu_fu(
   clk: clock, rst: bool,
   set_op_a: Option<uint<32>>,
   trig:     Option<(AluOp, uint<32>)>
@@ -51,7 +51,7 @@ entity alu_fu(
         // Saturating Arithmetic (Unsigned)
         Some((AluOp::USadd, b)) => Some(uadd32(op_a, b)),
         Some((AluOp::USsub, b)) => Some(usub32(op_a, b)),
-        
+
         None => None
     };
 
@@ -68,7 +68,7 @@ entity alu_fu(
 fn uadd32(a: uint<32>, b: uint<32>) -> uint<32> {
     // Extend to 33 bits to detect overflow beyond 0xFFFFFFFF
     let sum: uint<33> = zext(a) + zext(b);
-    
+
     // 0x100000000 is the first value that doesn't fit in 32 bits
     if sum > 0xFFFFFFFF {
         0xFFFFFFFF // Clamp to Max Uint
@@ -92,14 +92,14 @@ fn usub32(a: uint<32>, b: uint<32>) -> uint<32> {
 
 fn sadd32(a_u: uint<32>, b_u: uint<32>) -> uint<32> {
     // Cast to signed
-    let a: int<32> = a_u.to_int();
-    let b: int<32> = b_u.to_int();
-    
+    let a: int<32> = a_u.as_int();
+    let b: int<32> = b_u.as_int();
+
     // Sign extend to 33 bits to capture overflow
     let a_big: int<33> = sext(a);
     let b_big: int<33> = sext(b);
     let sum = a_big + b_big;
-    
+
     // Check Limits
     // Max Int (32-bit):  2147483647
     // Min Int (32-bit): -2147483648
@@ -110,25 +110,25 @@ fn sadd32(a_u: uint<32>, b_u: uint<32>) -> uint<32> {
     } else {
         // Safe to truncate back
         let sum: int<32> = trunc(sum);
-        sum.to_uint()
+        sum.as_uint()
     }
 }
 
 fn ssub32(a_u: uint<32>, b_u: uint<32>) -> uint<32> {
-    let a: int<32> = a_u.to_int();
-    let b: int<32> = b_u.to_int();
-    
+    let a: int<32> = a_u.as_int();
+    let b: int<32> = b_u.as_int();
+
     let a_big: int<33> = sext(a);
     let b_big: int<33> = sext(b);
     let diff: int<34> = a_big - b_big;
-    
+
     if diff > 2147483647 {
         0x7FFFFFFF
     } else if diff < -2147483648 {
         0x80000000
     } else {
         let trunc_diff: int<32> = trunc(diff);
-        trunc_diff.to_uint()
+        trunc_diff.as_uint()
     }
 }
 
@@ -169,21 +169,21 @@ fn rotr32(x: uint<32>, sh: uint<5>) -> uint<32> {
 
 // Bus Helpers
 
-fn pick_alu_seta(m0: Option<Msg>, m1: Option<Msg>) -> Option<uint<32>> {
+pub fn pick_alu_seta(m0: Option<Msg>, m1: Option<Msg>) -> Option<uint<32>> {
     match m1 {
         Some(Msg::ALU_SetA(x)) => Some(x),
-        _ => match m0 { 
-            Some(Msg::ALU_SetA(x)) => Some(x), 
+        _ => match m0 {
+            Some(Msg::ALU_SetA(x)) => Some(x),
             _ => None }
     }
 }
 
-fn pick_alu_trig(m0: Option<Msg>, m1: Option<Msg>) -> Option<(AluOp, uint<32>)> {
+pub fn pick_alu_trig(m0: Option<Msg>, m1: Option<Msg>) -> Option<(AluOp, uint<32>)> {
     match m1 {
         Some(Msg::ALU_Trig(op, x)) => Some((op, x)),
-        _ => match m0 { 
-            Some(Msg::ALU_Trig(op, x)) => Some((op, x)), 
-            _ => None 
+        _ => match m0 {
+            Some(Msg::ALU_Trig(op, x)) => Some((op, x)),
+            _ => None
         }
     }
 }

@@ -41,12 +41,12 @@ struct State {
     step: BL,         // current state machine step
     ver: uint<16>,    // version
     nleft: uint<16>,  // number of instructions left
-    entry: uint<10>,  // 
+    entry: uint<10>,  //
     pcw: uint<10>,    // write address (instr index)
 
     // shifters for slot words
     w0: uint<32>,
-    w1: uint<32> 
+    w1: uint<32>
 }
 
 struct LoaderOutput {
@@ -61,7 +61,7 @@ fn reset_state() -> State {
     State(BL::WaitB, 0,0,0,0,0,0)
 }
 
-entity bootloader(
+pub entity bootloader(
   clk: clock, rst: bool,
   byte_valid: bool,         // strobed high when this is a valid byte to consume
   byte: uint<8>
@@ -70,22 +70,22 @@ entity bootloader(
     // State Machine
     reg(clk) st: State reset(rst: reset_state()) = {
         match (byte_valid, st.step) {
-            (true, BL::WaitB) => if byte == 0x42u8 { 
-                    State(BL::WaitT, st.ver, st.nleft, st.entry, st.pcw, st.w0, st.w1) 
-                } else { 
+            (true, BL::WaitB) => if byte == 0x42u8 {
+                    State(BL::WaitT, st.ver, st.nleft, st.entry, st.pcw, st.w0, st.w1)
+                } else {
                     reset_state()
                 },
-            (true, BL::WaitT) => if byte == 0x54u8 { 
-                    State(BL::Ver0, st.ver, st.nleft, st.entry, st.pcw, st.w0, st.w1) 
-                } else { 
+            (true, BL::WaitT) => if byte == 0x54u8 {
+                    State(BL::Ver0, st.ver, st.nleft, st.entry, st.pcw, st.w0, st.w1)
+                } else {
                     reset_state()
                 },
             (true, BL::Ver0) => State(BL::Ver1, zext(byte), st.nleft, st.entry, st.pcw, st.w0, st.w1),
             (true, BL::Ver1) => {
                     let v = (zext(byte) << 8) | st.ver;
-                    if v == 0x0001u16 { 
+                    if v == 0x0001u16 {
                         State(BL::N0, trunc(v), st.nleft, st.entry, st.pcw, st.w0, st.w1)
-                    } else { 
+                    } else {
                         reset_state()
                     }
                 },
@@ -98,9 +98,9 @@ entity bootloader(
             (true, BL::E0) => State(BL::E1, st.ver, st.nleft, zext(byte), st.pcw, st.w0, st.w1),
             (true, BL::E1) => {
                     let e = (zext(byte) << 8) | st.entry;
-                    if st.nleft == 0u16 { 
-                        State(BL::Done, st.ver, st.nleft, trunc(e), st.pcw, st.w0, st.w1) 
-                    } else { 
+                    if st.nleft == 0u16 {
+                        State(BL::Done, st.ver, st.nleft, trunc(e), st.pcw, st.w0, st.w1)
+                    } else {
                         State(BL::W0_B0, st.ver, st.nleft, trunc(e), st.pcw, st.w0, st.w1)
                     }
                 },
@@ -119,12 +119,12 @@ entity bootloader(
 
             // write both words to IMEM and advance
             // Commit doesn't care about a valid byte
-            (_, BL::Commit) => {    
+            (_, BL::Commit) => {
                 let pcw1 = trunc(st.pcw + 1);   // increment program counter
                 let n1   = trunc(st.nleft - 1); // decrement number of instructions left
-                let next = if n1 == 0u16 { 
+                let next = if n1 == 0u16 {
                     BL::Done
-                } else { 
+                } else {
                     BL::W0_B0
                 };
                 State(next, st.ver, n1, st.entry, pcw1, st.w0, st.w1)

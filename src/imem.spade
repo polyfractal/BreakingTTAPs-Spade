@@ -1,8 +1,8 @@
-use tta::tta::Move;
-use tta::tta::Src;
-use tta::tta::Dst;
-use tta::tta::Instr;
-use tta::sram;
+use lib::tta::Move;
+use lib::tta::Src;
+use lib::tta::Dst;
+use lib::tta::Instr;
+use lib::sram;
 
 
 //============================================================
@@ -65,7 +65,7 @@ fn decode_src_tok(t: uint<8>, imm16: uint<16>) -> Src {
         62u8 => Src::SPI_In8,
 
         // RF[8..15]
-        100u8 => Src::RegisterFile(8u4),   
+        100u8 => Src::RegisterFile(8u4),
         101u8 => Src::RegisterFile(9u4),
         102u8 => Src::RegisterFile(10u4),
         103u8 => Src::RegisterFile(11u4),
@@ -76,7 +76,7 @@ fn decode_src_tok(t: uint<8>, imm16: uint<16>) -> Src {
 
         110u8 => Src::PC_Next,
 
-        // Reserved bands for future FUs 
+        // Reserved bands for future FUs
         _ => Src::Zero
     }
 }
@@ -107,8 +107,8 @@ fn decode_dst_tok(t: uint<8>) -> Dst {
         15u8 => Dst::ALU_Shl_Trig,
         16u8 => Dst::ALU_Shr_Trig,
         17u8 => Dst::ALU_Ashr_Trig,
-        18u8 => Dst::ALU_Rotl_Trig ,    
-        19u8 => Dst::ALU_Rotr_Trig ,    
+        18u8 => Dst::ALU_Rotl_Trig ,
+        19u8 => Dst::ALU_Rotr_Trig ,
 
         // LSU
         20u8 => Dst::LSU_AddrA,
@@ -166,14 +166,14 @@ fn decode_dst_tok(t: uint<8>) -> Dst {
         // Multiply-and-accumulate
         53u8 => Dst::MAC_AddrA,
         54u8 => Dst::MAC_Trig,
-        55u8 => Dst::MAC_Clear,     
+        55u8 => Dst::MAC_Clear,
 
         // SEL
         56u8 => Dst::SEL_Cond,
         57u8 => Dst::SEL_SetA,
-        58u8 => Dst::SEL_TrigB,    
+        58u8 => Dst::SEL_TrigB,
 
-        59u8 => Dst::TNH_Trig,           
+        59u8 => Dst::TNH_Trig,
 
         // Output
         60u8 => Dst::GPO_Out,
@@ -182,8 +182,8 @@ fn decode_dst_tok(t: uint<8>) -> Dst {
         // Modulo-Add
         62u8 => Dst::MDA_Base,
         63u8 => Dst::MDA_Mask,
-        64u8 => Dst::MDA_Ptr,  
-        65u8 => Dst::MDA_Trig,  
+        64u8 => Dst::MDA_Ptr,
+        65u8 => Dst::MDA_Trig,
 
         // More ALU lol
         66u8 => Dst::ALU_SSadd_Trig,
@@ -247,7 +247,7 @@ fn decode_move(mw: uint<32>) -> Move {
 fn zero32() -> uint<32> { 0u32 }
 
 
-entity imem(
+pub entity imem(
     clk: clock, rst: bool,
 
     // run-time fetch
@@ -274,7 +274,7 @@ entity imem(
         Some(instr) => instr,
         None => 0
     };
-    
+
     reg(clk) rdata0: uint<32> = inst sram::iram_1024x32(clk, rst, addr_calc, wren, wdata0);
     reg(clk) rdata1: uint<32> = inst sram::iram_1024x32(clk, rst, addr_calc, wren, wdata1);
 
@@ -290,6 +290,6 @@ entity imem(
                     Some(Instr(mv0, mv1))
                 }
             }
-        }   
+        }
     }
 }

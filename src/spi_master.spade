@@ -28,19 +28,19 @@ fn reset_spi() -> SPI {
     SPI(State::Idle, 0, 0, 0)
 }
 
-entity spi_master(
+pub entity spi_master(
     clk: clock,
     rst: bool,
     tick: bool,                   // Enable pulse (2x SCLK frequency)
-    miso: &uint<1>,
-    start_tx: &Option<uint<8>>     // Input: Some(byte) to start transaction
+    miso: uint<1>,
+    start_tx: Option<uint<8>>     // Input: Some(byte) to start transaction
 ) -> SpiOutput
 {
     reg(clk) r: SPI reset(rst: reset_spi()) =
         if tick {
             match r.state {
                 State::Idle => {
-                    match *start_tx {
+                    match start_tx {
                         // Start command received: Load data, assert CS (via state change), reset counters
                         Some(data) => SPI(State::Transfer, 0, data, 0),
                         None => r
@@ -60,7 +60,7 @@ entity spi_master(
                     else if (new_cnt % 2) != 0 {
                         // Rising Edge (Odd cnt): Sample MISO
                         // We store it in 'sample' until the falling edge shift
-                        SPI(State::Transfer, new_cnt, r.sh, *miso)
+                        SPI(State::Transfer, new_cnt, r.sh, miso)
                     }
                     else {
                         // Falling Edge (Even cnt): Shift Left
@@ -110,4 +110,3 @@ entity spi_master(
 
     SpiOutput(cs, sclk, mosi, rx_val)
 }
-

@@ -1,11 +1,11 @@
-use tta::tta::Msg;
+use lib::tta::Msg;
 
 //============================================================
 // DIV - shift sub division FU
-// 
+//
 // - OpA holds dividend, Trigger with divisor.
 // - Latency: 32 Cycles
-// - output in Div_Res. 
+// - output in Div_Res.
 // - Div_Res is undefined for all other cycles
 //============================================================
 
@@ -28,7 +28,7 @@ fn reset_div() -> DivRegs {
     DivRegs(State::Idle, 0, 0, 0, 0, 0)
 }
 
-entity div_shiftsub_fu(
+pub entity div_shiftsub_fu(
   clk: clock, rst: bool,
   set_op_a: Option<uint<32>>, // Dividend
   trig:     Option<uint<32>>  // Divisor (Triggers start)
@@ -55,7 +55,7 @@ entity div_shiftsub_fu(
 
             // Subtract: Check if we can subtract Divisor
             let can_sub = rem_shifted >= r.divisor;
-            
+
             // Update Remainder and Quotient Bit
             let (next_rem, quot_bit) = if can_sub {
                 (trunc(rem_shifted - r.divisor), 1u32)
@@ -87,7 +87,7 @@ entity div_shiftsub_fu(
                 let rem_shifted = (r.remainder << 1) | msb_dividend;
                 let can_sub = rem_shifted >= r.divisor;
                 let quot_bit = if can_sub { 1u32 } else { 0u32 };
-                
+
                 Some((r.quotient << 1) | quot_bit)
             } else {
                 None
@@ -98,14 +98,14 @@ entity div_shiftsub_fu(
 }
 
 // Bus helpers
-fn pick_div_seta(m0: Option<Msg>, m1: Option<Msg>) -> Option<uint<32>> {
+pub fn pick_div_seta(m0: Option<Msg>, m1: Option<Msg>) -> Option<uint<32>> {
   match m1 {
     Some(Msg::DIV_SetA(x)) => Some(x),
     _ => match m0 { Some(Msg::DIV_SetA(x)) => Some(x), _ => None }
   }
 }
 
-fn pick_div_trig(m0: Option<Msg>, m1: Option<Msg>) -> Option<uint<32>> {
+pub fn pick_div_trig(m0: Option<Msg>, m1: Option<Msg>) -> Option<uint<32>> {
   match m1 {
     Some(Msg::DIV_Trig(x)) => Some(x),
     _ => match m0 { Some(Msg::DIV_Trig(x)) => Some(x), _ => None }

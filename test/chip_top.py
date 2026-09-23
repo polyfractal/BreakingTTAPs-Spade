@@ -52,9 +52,9 @@ class TokenNamespace:
         """Reconstruct Spade string from token ID using reverse map."""
         if token not in self._rev_map:
             return f"{self.name}::Zero" # Fallback/Default
-        
+
         name, arg = self._rev_map[token]
-        
+
         if name == "RegisterFile":
             return f"{self.name}::{name}({arg})"
         elif name == "Immediate":
@@ -86,13 +86,13 @@ def parse_spade_tokens(filename):
             return TokenNamespace(namespace_prefix, {}, {}, {})
 
         block_content = func_regex.group(1)
-        
+
         # Parse lines like: 10u8 => Src::Immediate(zext(imm16)),
         # Captures: (token_id, type_prefix, variant_name, args)
         # e.g. ('10', 'Src', 'Immediate', 'zext(imm16)')
         # e.g. ('00', 'Src', 'RegisterFile', '0u4')
         pattern = re.compile(r'(\d+)u8\s*=>\s*(\w+)::(\w+)(?:\((.*?)\))?')
-        
+
         for line in block_content.split('\n'):
             line = line.split('//')[0].strip() # Remove comments
             m = pattern.search(line)
@@ -117,7 +117,7 @@ def parse_spade_tokens(filename):
                 else:
                     general_map[variant] = tok_id
                     rev_arg = None
-                
+
                 rev_map[tok_id] = (variant, rev_arg)
 
         return TokenNamespace(namespace_prefix, general_map, rf_map, rev_map)
@@ -126,7 +126,7 @@ def parse_spade_tokens(filename):
     dst = parse_func("decode_dst_tok", "Dst")
     return src, dst
 
-    
+
 def setup_token_maps():
     global Src
     global Dst
@@ -193,14 +193,14 @@ def create_program_binary(moves, entry_pc=0):
     # Header: BT (2), Ver (2), Cnt (2), Entry (2)
     # struct format '<2sHHH' = 2 char bytes, unsigned short, unsigned short, unsigned short (Little Endian)
     header = struct.pack('<2sHHH', MAGIC, VERSION, count, entry_pc)
-    
+
     body = bytearray()
     for (m0, m1) in moves:
         w0 = pack_move(*m0)
         w1 = pack_move(*m1)
         # Each instruction is 2 words (8 bytes)
         body += struct.pack('<II', w0, w1)
-        
+
     return header + body
 
 async def drive_parallel_byte( s, byte_val):
@@ -212,21 +212,21 @@ async def drive_parallel_byte( s, byte_val):
     # Setup Data
     s.i.parallel_clock = False
     await Timer(EXT_CLK_PERIOD_NS // 2, units='ns')
-    
-    s.i.parallel_in = f"&{byte_val}"
+
+    s.i.parallel_in = f"{byte_val}"
     s.i.parallel_strobe = True
-    
+
     # Hold for setup time
     await Timer(EXT_CLK_PERIOD_NS // 2, units='ns')
-    
+
     # Rising Edge (Capture)
     s.i.parallel_clock = True
     await Timer(EXT_CLK_PERIOD_NS // 2, units='ns')
-    
+
     # Falling Edge (End of Cycle)
     s.i.parallel_clock = False
     s.i.parallel_strobe = False
-    
+
     await Timer(EXT_CLK_PERIOD_NS // 2, units='ns')
 
 async def load_program(dut, s, binary_data):
@@ -253,18 +253,18 @@ async def test_boot_and_run(dut):
 
     # Start System Clock
     await cocotb.start(Clock(dut.clk, period=CLK_PERIOD_NS, units="ns").start())
-    
+
     # Init Signals
     s = SpadeExt(dut)
     s.i.rst = True
-    s.i.uart_rx = "&true"
+    s.i.uart_rx = "true"
     s.i.uart_tick16 = False
-    s.i.miso = "&0"
-    s.i.gpi16 = "&0"
-    s.i.parallel_in = "&0"
+    s.i.miso = "0"
+    s.i.gpi16 = "0"
+    s.i.parallel_in = "0"
     s.i.parallel_strobe = False
     s.i.parallel_clock = False
-    
+
     await FallingEdge(dut.clk)
     s.i.rst = False
     await FallingEdge(dut.clk)
@@ -278,28 +278,28 @@ async def test_boot_and_run(dut):
     prog_moves = [
         # Instr 0: Slot0(Imm(10) -> OpA), Slot1(NOP)
         ((1, Src.Immediate, Dst.ALU_OpA, 10), (0, Src.Immediate, Dst.ALU_OpA, 0)),
-        
+
         # Instr 1: Slot0(Imm(5) -> Add), Slot1(NOP)
         ((1, Src.Immediate, Dst.ALU_Add_Trig, 5), (0, Src.Immediate, Dst.ALU_OpA, 0)),
-        
+
         # Instr 2: Slot0(ALU_Res -> GPO), Slot1(NOP)
         ((1, Src.ALU_Res, Dst.GPO_Out, 5), (0, Src.Immediate, Dst.ALU_OpA, 0)),
-        
+
         # Instr 3: Slot0(Imm(0) -> PC), Slot1(NOP) -> Loop
         ((1, Src.Immediate, Dst.PC_Trig, 0), (0, Src.Immediate, Dst.ALU_OpA, 0)),
     ]
-    
+
     binary = create_program_binary(prog_moves, entry_pc=0)
-    
+
     # --- 2. Load Program ---
     await load_program(dut, s, binary)
-    
-    # --- 3. Verify Execution ---    
+
+    # --- 3. Verify Execution ---
     dut._log.info("Program Loaded. Waiting for execution...")
-    
+
     # Wait until we see PC=0 (Program Start)
     # We might see Reset state first.
-    
+
     found_pc0 = False
     for _ in range(50):
         await FallingEdge(dut.clk)
@@ -308,10 +308,10 @@ async def test_boot_and_run(dut):
         if s.o.pc == "0":
             found_pc0 = True
             break
-            
+
     assert found_pc0, "Core did not reset to PC=0 after bootload."
-    
-    
+
+
 
     # two clock delay to get going
     await FallingEdge(dut.clk)
@@ -325,20 +325,20 @@ async def test_boot_and_run(dut):
 
     dut._log.info(f"Cycle 1: PC={s.o.pc.value()}, GPO={s.o.gpo16.value()}")
     s.o.pc.assert_eq(1)
-    
+
     await FallingEdge(dut.clk)
     dut._log.info(f"Cycle 2: PC={s.o.pc.value()}, GPO={s.o.gpo16.value()}")
     s.o.pc.assert_eq(2)
-    
+
     await FallingEdge(dut.clk)
     dut._log.info(f"Cycle 3: PC={s.o.pc.value()}, GPO={s.o.gpo16.value()}")
     s.o.pc.assert_eq(3)
-    
-    
+
+
     await FallingEdge(dut.clk)
     dut._log.info(f"Cycle 4: PC={s.o.pc.value()}, GPO={s.o.gpo16.value()}")
     s.o.pc.assert_eq(4)
-   
+
     await FallingEdge(dut.clk)
     dut._log.info(f"Cycle 5: PC={s.o.pc.value()}")
     s.o.pc.assert_eq(5)
@@ -357,20 +357,20 @@ async def test_boot_and_run(dut):
 
     dut._log.info(f"Cycle 1: PC={s.o.pc.value()}, GPO={s.o.gpo16.value()}")
     s.o.pc.assert_eq(1)
-    
+
     await FallingEdge(dut.clk)
     dut._log.info(f"Cycle 2: PC={s.o.pc.value()}, GPO={s.o.gpo16.value()}")
     s.o.pc.assert_eq(2)
-    
+
     await FallingEdge(dut.clk)
     dut._log.info(f"Cycle 3: PC={s.o.pc.value()}, GPO={s.o.gpo16.value()}")
     s.o.pc.assert_eq(3)
-    
-    
+
+
     await FallingEdge(dut.clk)
     dut._log.info(f"Cycle 4: PC={s.o.pc.value()}, GPO={s.o.gpo16.value()}")
     s.o.pc.assert_eq(4)
-   
+
     await FallingEdge(dut.clk)
     dut._log.info(f"Cycle 5: PC={s.o.pc.value()}")
     s.o.pc.assert_eq(5)

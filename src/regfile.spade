@@ -1,4 +1,4 @@
-use tta::tta::Msg;
+use lib::tta::Msg;
 
 //============================================================
 // Register file: 16 x 32, 2 read ports + 2 writes per cycle
@@ -30,7 +30,7 @@ struct RegisterReadValues {
     r15: uint<32>,
 }
 
-entity regfile8_fu(
+pub entity regfile8_fu(
   clk: clock, rst: bool,
   // write intents for this cycle (applied on next edge)
   wr0: Option<(uint<4>, uint<32>)>,
@@ -39,7 +39,7 @@ entity regfile8_fu(
   ra0: uint<4>, ra1: uint<4>
 ) -> RegisterReadValues // (rd0, rd1)
 {
-    
+
     reg(clk) r0: uint<32> reset(rst: 0) = write_mux(0, r0, wr0, wr1);
     reg(clk) r1: uint<32> reset(rst: 0) = write_mux(1, r1, wr0, wr1);
     reg(clk) r2: uint<32> reset(rst: 0) = write_mux(2, r2, wr0, wr1);
@@ -59,41 +59,41 @@ entity regfile8_fu(
     reg(clk) r15: uint<32> reset(rst: 0) = write_mux(15, r15, wr0, wr1);
 
     // Combinational read muxes
-    let rd0: uint<32> = match ra0 { 
-                            0 => r0, 
-                            1 => r1, 
-                            2 => r2, 
-                            3 => r3, 
-                            4 => r4, 
-                            5 => r5, 
-                            6 => r6, 
+    let rd0: uint<32> = match ra0 {
+                            0 => r0,
+                            1 => r1,
+                            2 => r2,
+                            3 => r3,
+                            4 => r4,
+                            5 => r5,
+                            6 => r6,
                             7 => r7,
-                            8 => r8, 
+                            8 => r8,
                             9 => r9,
-                            10 => r10, 
-                            11 => r11, 
-                            12 => r12, 
-                            13 => r13, 
-                            14 => r14, 
+                            10 => r10,
+                            11 => r11,
+                            12 => r12,
+                            13 => r13,
+                            14 => r14,
                             _ => r15,
                         };
 
-    let rd1: uint<32> = match ra1 { 
-                            0 => r0, 
-                            1 => r1, 
-                            2 => r2, 
-                            3 => r3, 
-                            4 => r4, 
-                            5 => r5, 
-                            6 => r6, 
+    let rd1: uint<32> = match ra1 {
+                            0 => r0,
+                            1 => r1,
+                            2 => r2,
+                            3 => r3,
+                            4 => r4,
+                            5 => r5,
+                            6 => r6,
                             7 => r7,
-                            8 => r8, 
+                            8 => r8,
                             9 => r9,
-                            10 => r10, 
-                            11 => r11, 
-                            12 => r12, 
-                            13 => r13, 
-                            14 => r14, 
+                            10 => r10,
+                            11 => r11,
+                            12 => r12,
+                            13 => r13,
+                            14 => r14,
                             _ => r15
                         };
 
@@ -101,7 +101,7 @@ entity regfile8_fu(
 }
 
 // Bus helper
-fn route_rf_one(m: Option<Msg>) -> Option<(uint<4>, uint<32>)> {
+pub fn route_rf_one(m: Option<Msg>) -> Option<(uint<4>, uint<32>)> {
     match m {
         Some(Msg::RF_Write(i, x)) => Some((i, x)),
         _ => None

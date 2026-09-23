@@ -1,4 +1,4 @@
-use tta::tta::Msg;
+use lib::tta::Msg;
 
 //============================================================
 // SPI input functional unit
@@ -7,14 +7,14 @@ use tta::tta::Msg;
 // - FIFO will drop values if full
 //============================================================
 
-entity spi_in(
+pub entity spi_in(
   clk: clock, rst: bool,
   miso_byte: Option<uint<8>>,
-  pop: bool          
-) -> Option<uint<32>>           
+  pop: bool
+) -> Option<uint<32>>
 {
     // Small FIFO queue to help buffer data
-    let data = inst tta::fifo::fifo_u8(clk, rst, miso_byte, pop);
+    let data = inst lib::fifo::fifo_u8(clk, rst, miso_byte, pop);
     reg(clk) data: Option<uint<32>> reset(rst: None) = match data {
       Some(b) => Some(zext(b)),
       None => None
@@ -31,41 +31,41 @@ entity spi_in(
 //============================================================
 
 
-entity spi_out8(
+pub entity spi_out8(
   clk: clock, rst: bool,
   byte_to_write: Option<uint<8>> ,
-  mosi: inv &Option<uint<8>>,  
-  spi_busy: bool       
-) -> ()         
+  mosi: inv Option<uint<8>>,
+  spi_busy: bool
+) -> ()
 {
     // Small FIFO queue to help buffer data
     // if miso is_some(), it will get pushed onto the queue
     // if there is any data (including current byte), pop
-    let data = inst tta::fifo::fifo_u8(clk, rst, byte_to_write, !spi_busy);   // only pop if SPI is not busy
+    let data = inst lib::fifo::fifo_u8(clk, rst, byte_to_write, !spi_busy);   // only pop if SPI is not busy
     reg(clk) data: Option<uint<8>> reset(rst: None) = match data {
       Some(b) => Some(b),
       None => None
     };
 
-    set mosi = &data;
+    set mosi = data;
 }
 
 // Bus helpers
 
-fn pick_spi_inpop(m0: Option<Msg>, m1: Option<Msg>) -> bool {
+pub fn pick_spi_inpop(m0: Option<Msg>, m1: Option<Msg>) -> bool {
     match m1 {
         Some(Msg::SPI_InPop_Trig) => true,
-        _ => match m0 { 
-            Some(Msg::SPI_InPop_Trig) => true, 
+        _ => match m0 {
+            Some(Msg::SPI_InPop_Trig) => true,
             _ => false }
     }
 }
 
-fn pick_spi_out8(m0: Option<Msg>, m1: Option<Msg>) -> Option<uint<8>> {
+pub fn pick_spi_out8(m0: Option<Msg>, m1: Option<Msg>) -> Option<uint<8>> {
     match m1 {
         Some(Msg::SPI_Out8(x)) => Some(x),
-        _ => match m0 { 
-            Some(Msg::SPI_Out8(x)) => Some(x), 
+        _ => match m0 {
+            Some(Msg::SPI_Out8(x)) => Some(x),
             _ => None }
     }
 }

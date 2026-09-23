@@ -1,7 +1,4 @@
-name = "tta"
-
-compiler.git = "https://gitlab.com/spade-lang/spade.git"
-compiler.branch = "no-refutability"
+name = "ttaps"
 
 [verilog]
 sources = ["verilog/gf180mcu_fd_ip_sram__sram512x8m8wm1.v", "verilog/gf180mcu_fd_ip_sram__sram256x8m8wm1.v"]

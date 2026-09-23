@@ -1,5 +1,5 @@
-use tta::tta::Msg;
-use tta::sram;
+use lib::tta::Msg;
+use lib::sram;
 
 //============================================
 // Load/Store FU (1-cycle visible latency for loads)
@@ -12,7 +12,7 @@ use tta::sram;
 // - If both load_trig and store_trig are present, STORE wins and no load is produced.
 // - Addressing: load_trig uses its value as B; store uses current A (no offset).
 //============================================
-entity lsu_fu (
+pub entity lsu_fu (
   clk: clock, rst: bool,
   set_addr_a: Option<uint<32>>,
   load_trig:  Option<uint<32>>,   // offset B; triggers LOAD
@@ -25,9 +25,9 @@ entity lsu_fu (
         None    => addr_a
     };
 
-    let addr_calc: uint<33> = match load_trig { 
-        Some(b) => addr_a + b, 
-        None => zext(addr_a) 
+    let addr_calc: uint<33> = match load_trig {
+        Some(b) => addr_a + b,
+        None => zext(addr_a)
     };
 
     // Compute address for LOAD when load_trig is present
@@ -49,62 +49,62 @@ entity lsu_fu (
 
 // Bus helpers
 
-fn pick_lsu_seta(m0: Option<Msg>, m1: Option<Msg>) -> Option<uint<32>> {
-    match m1 { 
-        Some(Msg::LSU_SetA(x)) => Some(x), 
-        _ => match m0 { 
-            Some(Msg::LSU_SetA(x)) => Some(x), 
-            _ => None 
-        } 
+pub fn pick_lsu_seta(m0: Option<Msg>, m1: Option<Msg>) -> Option<uint<32>> {
+    match m1 {
+        Some(Msg::LSU_SetA(x)) => Some(x),
+        _ => match m0 {
+            Some(Msg::LSU_SetA(x)) => Some(x),
+            _ => None
+        }
     }
 }
 
-fn pick_lsu_loadtrig(m0: Option<Msg>, m1: Option<Msg>) -> Option<uint<32>> {
-    match m1 { 
-        Some(Msg::LSU_Load_Trig(x)) => Some(x), 
-        _ => match m0 { 
-            Some(Msg::LSU_Load_Trig(x)) => Some(x), 
-            _ => None 
-        } 
+pub fn pick_lsu_loadtrig(m0: Option<Msg>, m1: Option<Msg>) -> Option<uint<32>> {
+    match m1 {
+        Some(Msg::LSU_Load_Trig(x)) => Some(x),
+        _ => match m0 {
+            Some(Msg::LSU_Load_Trig(x)) => Some(x),
+            _ => None
+        }
     }
 }
 
-fn pick_lsu_storetrig(m0: Option<Msg>, m1: Option<Msg>) -> Option<uint<32>> {
-    match m1 { 
-        Some(Msg::LSU_Store_Trig(x)) => Some(x), 
-        _ => match m0 { 
-            Some(Msg::LSU_Store_Trig(x)) => Some(x), 
-            _ => None 
+pub fn pick_lsu_storetrig(m0: Option<Msg>, m1: Option<Msg>) -> Option<uint<32>> {
+    match m1 {
+        Some(Msg::LSU_Store_Trig(x)) => Some(x),
+        _ => match m0 {
+            Some(Msg::LSU_Store_Trig(x)) => Some(x),
+            _ => None
         } }
 }
 
 
 
-fn pick_lsu2_seta(m0: Option<Msg>, m1: Option<Msg>) -> Option<uint<32>> {
-    match m1 { 
-        Some(Msg::LSU2_SetA(x)) => Some(x), 
-        _ => match m0 { 
-            Some(Msg::LSU2_SetA(x)) => Some(x), 
-            _ => None 
-        } 
+pub fn pick_lsu2_seta(m0: Option<Msg>, m1: Option<Msg>) -> Option<uint<32>> {
+    match m1 {
+        Some(Msg::LSU2_SetA(x)) => Some(x),
+        _ => match m0 {
+            Some(Msg::LSU2_SetA(x)) => Some(x),
+            _ => None
+        }
     }
 }
 
-fn pick_lsu2_loadtrig(m0: Option<Msg>, m1: Option<Msg>) -> Option<uint<32>> {
-    match m1 { 
-        Some(Msg::LSU2_Load_Trig(x)) => Some(x), 
-        _ => match m0 { 
-            Some(Msg::LSU2_Load_Trig(x)) => Some(x), 
-            _ => None 
-        } 
+pub fn pick_lsu2_loadtrig(m0: Option<Msg>, m1: Option<Msg>) -> Option<uint<32>> {
+    match m1 {
+        Some(Msg::LSU2_Load_Trig(x)) => Some(x),
+        _ => match m0 {
+            Some(Msg::LSU2_Load_Trig(x)) => Some(x),
+            _ => None
+        }
     }
 }
 
-fn pick_lsu2_storetrig(m0: Option<Msg>, m1: Option<Msg>) -> Option<uint<32>> {
-    match m1 { 
-        Some(Msg::LSU2_Store_Trig(x)) => Some(x), 
-        _ => match m0 { 
-            Some(Msg::LSU2_Store_Trig(x)) => Some(x), 
-            _ => None 
+pub fn pick_lsu2_storetrig(m0: Option<Msg>, m1: Option<Msg>) -> Option<uint<32>> {
+    match m1 {
+        Some(Msg::LSU2_Store_Trig(x)) => Some(x),
+        _ => match m0 {
+            Some(Msg::LSU2_Store_Trig(x)) => Some(x),
+            _ => None
         } }
 }

@@ -35,7 +35,7 @@ struct FifoOut {
     val: Option<uint<8>> // Valid data if !empty
 }
 
-entity fifo_u8(
+pub entity fifo_u8(
     clk: clock,
     rst: bool,
     push: Option<uint<8>>, // Some(val) to push
@@ -52,14 +52,14 @@ entity fifo_u8(
             Some(_) => !is_full || pop, // Allow push if full AND popping (overwrite/shift logic)
             None => false
         };
-        
+
         // We only pop if not empty
         let do_pop = pop && !is_empty;
 
         // Calculate next pointers and count
         let next_w = if do_push { trunc(s.w_ptr + 1) } else { s.w_ptr };
         let next_r = if do_pop  { trunc(s.r_ptr + 1) } else { s.r_ptr };
-        
+
         let next_count = match (do_push, do_pop) {
             (true, false) => trunc(s.count + 1),
             (false, true) => trunc(s.count - 1),
@@ -78,7 +78,7 @@ entity fifo_u8(
     // Output Logic (Combinational)
     let empty = s.count == 0;
     let full  = s.count == 8;
-    
+
     // Data at read pointer is always available (Zero Latency / FWFT)
     let out_val = if !empty {
         // Access array at read pointer

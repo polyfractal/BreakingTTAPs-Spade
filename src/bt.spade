@@ -1,10 +1,10 @@
-use tta::tta::Msg;
+use lib::tta::Msg;
 
 //============================================================
 // Branch if True
 // - If `condition_trig` == true, jump to `jump_to`
 //============================================================
-entity bt_fu(
+pub entity bt_fu(
   clk: clock, rst: bool,
   jump_to: Option<uint<10>>,        // target address
   condition_trig: Option<uint<32>>  // if condition_trig == true, jump
@@ -14,7 +14,7 @@ entity bt_fu(
         Some(v) => Some(v),
         None => target
     };
-    
+
     match (target, condition_trig) {
         (Some(v), Some(c)) => {
             if to_bool(c) { Some(v) } else { None }
@@ -24,26 +24,26 @@ entity bt_fu(
 }
 
 // convert u32 to bool
-fn to_bool(x: uint<32>) -> bool { 
-    if x == 0 { 
-        false 
-    } else { 
-        true 
-    } 
+fn to_bool(x: uint<32>) -> bool {
+    if x == 0 {
+        false
+    } else {
+        true
+    }
 }
 
 
 
-fn pick_bt_target(m0: Option<Msg>, m1: Option<Msg>) -> Option<uint<10>> {
+pub fn pick_bt_target(m0: Option<Msg>, m1: Option<Msg>) -> Option<uint<10>> {
     match m1 {
         Some(Msg::BT_Target(a)) => Some(a),
         _ => match m0 { Some(Msg::BT_Target(a)) => Some(a), _ => None }
     }
-} 
+}
 
-fn pick_bt_trig(m0: Option<Msg>, m1: Option<Msg>) -> Option<uint<32>> {
+pub fn pick_bt_trig(m0: Option<Msg>, m1: Option<Msg>) -> Option<uint<32>> {
     match m1 {
         Some(Msg::BT_Trig(a)) => Some(a),
         _ => match m0 { Some(Msg::BT_Trig(a)) => Some(a), _ => None }
     }
-} 
+}

@@ -1,5 +1,5 @@
 
-use tta::tta::Msg;
+use lib::tta::Msg;
 
 //============================================================
 // Lightweight ALU functional unit
@@ -10,9 +10,9 @@ use tta::tta::Msg;
 // - Latency: 1 Cycle
 //============================================================
 
-enum LAluOp { Add, Sub, }
+pub enum LAluOp { Add, Sub, }
 
-entity lalu_fu(
+pub entity lalu_fu(
   clk: clock, rst: bool,
   set_op_a: Option<uint<32>>,
   trig:     Option<(LAluOp, uint<32>)>
@@ -38,21 +38,21 @@ entity lalu_fu(
 
 
 // Bus helpers
-fn pick_lalu_seta(m0: Option<Msg>, m1: Option<Msg>) -> Option<uint<32>> {
+pub fn pick_lalu_seta(m0: Option<Msg>, m1: Option<Msg>) -> Option<uint<32>> {
     match m1 {
         Some(Msg::LALU_SetA(x)) => Some(x),
-        _ => match m0 { 
-            Some(Msg::LALU_SetA(x)) => Some(x), 
+        _ => match m0 {
+            Some(Msg::LALU_SetA(x)) => Some(x),
             _ => None }
     }
 }
 
-fn pick_lalu_trig(m0: Option<Msg>, m1: Option<Msg>) -> Option<(LAluOp, uint<32>)> {
+pub fn pick_lalu_trig(m0: Option<Msg>, m1: Option<Msg>) -> Option<(LAluOp, uint<32>)> {
     match m1 {
         Some(Msg::LALU_Trig(op, x)) => Some((op, x)),
-        _ => match m0 { 
-            Some(Msg::LALU_Trig(op, x)) => Some((op, x)), 
-            _ => None 
+        _ => match m0 {
+            Some(Msg::LALU_Trig(op, x)) => Some((op, x)),
+            _ => None
         }
     }
 }

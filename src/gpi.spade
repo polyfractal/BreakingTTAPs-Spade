@@ -5,10 +5,10 @@
 // cycles delayed
 //============================================================
 
-entity gpi16(
+pub entity gpi16(
   clk: clock, rst: bool,
-  pins: uint<16>          
-) -> Option<uint<32>>           
+  pins: uint<16>
+) -> Option<uint<32>>
 {
   // 2-FF synchronizer
   // Not actually sure if this is necessary?

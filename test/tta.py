@@ -234,7 +234,7 @@ async def test_store_load_register(dut):
     s.o.pc_jump_comb.assert_eq("None")
     s.o.rf_w0.assert_eq("None")
     s.o.rf_w1.assert_eq("None")
-    s.o.rd0.assert_eq(0)   
+    s.o.rd0.assert_eq(0)
     s.o.rd1.assert_eq(0)
     s.o.lsu_res.assert_eq("Some(19)") # No data yet
     s.o.lsu_load.assert_eq("Some(0)") # matches address offset 0
@@ -247,9 +247,9 @@ async def test_store_load_register(dut):
     s.o.pc_jump_comb.assert_eq("None")
     s.o.rf_w0.assert_eq("None")
     s.o.rf_w1.assert_eq("None")
-    s.o.rd0.assert_eq(19)   
+    s.o.rd0.assert_eq(19)
     s.o.rd1.assert_eq(19)
-    s.o.lsu_res.assert_eq("None") 
+    s.o.lsu_res.assert_eq("None")
 
 @cocotb.test()
 async def test_store_load_add(dut):
@@ -315,7 +315,7 @@ async def test_store_load_add(dut):
     s.o.pc_jump_comb.assert_eq("None")
     s.o.rf_w0.assert_eq("None")
     s.o.rf_w1.assert_eq("None")
-    s.o.rd0.assert_eq(0)   
+    s.o.rd0.assert_eq(0)
     s.o.rd1.assert_eq(0)
     s.o.lsu_res.assert_eq("Some(19)") # No data yet
     s.o.lsu_load.assert_eq("Some(0)") # matches address offset 0
@@ -328,9 +328,9 @@ async def test_store_load_add(dut):
     s.o.pc_jump_comb.assert_eq("None")
     s.o.rf_w0.assert_eq("None")
     s.o.rf_w1.assert_eq("None")
-    s.o.rd0.assert_eq(0)   
+    s.o.rd0.assert_eq(0)
     s.o.rd1.assert_eq(0)
-    s.o.lsu_res.assert_eq("None") 
+    s.o.lsu_res.assert_eq("None")
 
     s.i.rst = False
     s.i.insn = "Instr( Move(Src::Immediate(1), Dst::ALU_Add_Trig, true), Move(Src::Zero, Dst::ALU_OpA, false) )" # Load into Reg 0
@@ -340,9 +340,9 @@ async def test_store_load_add(dut):
     s.o.pc_jump_comb.assert_eq("None")
     s.o.rf_w0.assert_eq("None")
     s.o.rf_w1.assert_eq("None")
-    s.o.rd0.assert_eq(0)   
+    s.o.rd0.assert_eq(0)
     s.o.rd1.assert_eq(0)
-    s.o.lsu_res.assert_eq("None") 
+    s.o.lsu_res.assert_eq("None")
 
     s.i.rst = False
     s.i.insn = "Instr( Move(Src::ALU_Res, Dst::RegisterFile(1u4), true), Move(Src::Zero, Dst::ALU_OpA, false) )" # Load into Reg 1
@@ -352,9 +352,9 @@ async def test_store_load_add(dut):
     s.o.pc_jump_comb.assert_eq("None")
     s.o.rf_w0.assert_eq("None")
     s.o.rf_w1.assert_eq("None")
-    s.o.rd0.assert_eq(0)   
+    s.o.rd0.assert_eq(0)
     s.o.rd1.assert_eq(0)
-    s.o.lsu_res.assert_eq("None") 
+    s.o.lsu_res.assert_eq("None")
 
     s.i.rst = False
     s.i.insn = "Instr( Move(Src::RegisterFile(1u4), Dst::LSU_Store_Trig, true), Move(Src::Zero, Dst::ALU_OpA, false) )" # Store from Reg 1
@@ -364,9 +364,9 @@ async def test_store_load_add(dut):
     s.o.pc_jump_comb.assert_eq("None")
     s.o.rf_w0.assert_eq("None")
     s.o.rf_w1.assert_eq("None")
-    s.o.rd0.assert_eq(20)   
+    s.o.rd0.assert_eq(20)
     s.o.rd1.assert_eq(0)
-    s.o.lsu_res.assert_eq("None") 
+    s.o.lsu_res.assert_eq("None")
     s.o.lsu_store.assert_eq("Some(20)")
 
     s.i.rst = False
@@ -377,10 +377,10 @@ async def test_store_load_add(dut):
     s.o.pc_jump_comb.assert_eq("None")
     s.o.rf_w0.assert_eq("None")
     s.o.rf_w1.assert_eq("None")
-    s.o.rd0.assert_eq(0)   
+    s.o.rd0.assert_eq(0)
     s.o.rd1.assert_eq(0)
-    s.o.lsu_res.assert_eq("Some(20)") 
-    s.o.lsu_load.assert_eq("Some(0)") 
+    s.o.lsu_res.assert_eq("Some(20)")
+    s.o.lsu_load.assert_eq("Some(0)")
 
 
 
@@ -397,7 +397,7 @@ async def test_gpi(dut):
         units='ns'
     ).start())
 
-    
+
     s.i.rst = True
     s.i.insn = "Instr(Move(Src::Zero, Dst::ALU_OpA, false), Move(Src::Zero, Dst::ALU_OpA, false))" #NOP
     await FallingEdge(clk)
@@ -434,9 +434,9 @@ async def test_gpi(dut):
     s.o.pc_jump_comb.assert_eq("None")
     s.o.rf_w0.assert_eq("None")
     s.o.rf_w1.assert_eq("None")
-    s.o.rd0.assert_eq(0)   
+    s.o.rd0.assert_eq(0)
     s.o.rd1.assert_eq(0)
-    s.o.lsu_res.assert_eq("None") 
+    s.o.lsu_res.assert_eq("None")
 
     s.i.rst = False
     s.i.insn = "Instr( Move(Src::ALU_Res, Dst::RegisterFile(1u4), true), Move(Src::Zero, Dst::ALU_OpA, false) )" # Load into Reg 1
@@ -446,9 +446,9 @@ async def test_gpi(dut):
     s.o.pc_jump_comb.assert_eq("None")
     s.o.rf_w0.assert_eq("None")
     s.o.rf_w1.assert_eq("None")
-    s.o.rd0.assert_eq(0)   
+    s.o.rd0.assert_eq(0)
     s.o.rd1.assert_eq(0)
-    s.o.lsu_res.assert_eq("None") 
+    s.o.lsu_res.assert_eq("None")
 
     s.i.rst = False
     s.i.insn = "Instr( Move(Src::RegisterFile(1u4), Dst::LSU_Store_Trig, true), Move(Src::Zero, Dst::ALU_OpA, false) )" # Store from Reg 1
@@ -458,9 +458,9 @@ async def test_gpi(dut):
     s.o.pc_jump_comb.assert_eq("None")
     s.o.rf_w0.assert_eq("None")
     s.o.rf_w1.assert_eq("None")
-    s.o.rd0.assert_eq(20)   
+    s.o.rd0.assert_eq(20)
     s.o.rd1.assert_eq(0)
-    s.o.lsu_res.assert_eq("None") 
+    s.o.lsu_res.assert_eq("None")
     s.o.lsu_store.assert_eq("Some(20)")
 
 
@@ -476,7 +476,7 @@ async def test_branch_if_true(dut):
         units='ns'
     ).start())
 
-    
+
     s.i.rst = True
     s.i.insn = "Instr(Move(Src::Zero, Dst::ALU_OpA, false), Move(Src::Zero, Dst::ALU_OpA, false))" #NOP
     await FallingEdge(clk)
@@ -493,7 +493,7 @@ async def test_branch_if_true(dut):
     await FallingEdge(clk)
 
     # set Branch-if-true target to 19
-    s.i.insn = "Instr(Move(Src::Immediate(19), Dst::BT_Target, true), Move(Src::Zero, Dst::ALU_OpA, false))" 
+    s.i.insn = "Instr(Move(Src::Immediate(19), Dst::BT_Target, true), Move(Src::Zero, Dst::ALU_OpA, false))"
     await FallingEdge(clk)
     s.o.pc_val.assert_eq(2)
     s.o.pc_jump_comb.assert_eq("None")
@@ -502,7 +502,7 @@ async def test_branch_if_true(dut):
     s.i.insn = "Instr( Move(Src::Immediate(1), Dst::BT_Trig, true), Move(Src::Zero, Dst::ALU_OpA, false) )"
     await FallingEdge(clk)
     s.o.pc_val.assert_eq(19)            # PC jumped to 19
-    
+
 @cocotb.test()
 async def test_branch_if_true_false(dut):
     s = SpadeExt(dut) # Wrap the dut in the Spade wrapper
@@ -515,7 +515,7 @@ async def test_branch_if_true_false(dut):
         units='ns'
     ).start())
 
-    
+
     s.i.rst = True
     s.i.insn = "Instr(Move(Src::Zero, Dst::ALU_OpA, false), Move(Src::Zero, Dst::ALU_OpA, false))" #NOP
     await FallingEdge(clk)
@@ -532,7 +532,7 @@ async def test_branch_if_true_false(dut):
     await FallingEdge(clk)
 
     # set Branch-if-true target to 19
-    s.i.insn = "Instr(Move(Src::Immediate(19), Dst::BT_Target, true), Move(Src::Zero, Dst::ALU_OpA, false))" 
+    s.i.insn = "Instr(Move(Src::Immediate(19), Dst::BT_Target, true), Move(Src::Zero, Dst::ALU_OpA, false))"
     await FallingEdge(clk)
     s.o.pc_val.assert_eq(2)
     s.o.pc_jump_comb.assert_eq("None")
@@ -555,7 +555,7 @@ async def test_branch_precedence_over_unconditional(dut):
         units='ns'
     ).start())
 
-    
+
     s.i.rst = True
     s.i.insn = "Instr(Move(Src::Zero, Dst::ALU_OpA, false), Move(Src::Zero, Dst::ALU_OpA, false))" #NOP
     await FallingEdge(clk)
@@ -572,7 +572,7 @@ async def test_branch_precedence_over_unconditional(dut):
     await FallingEdge(clk)
 
     # set Branch-if-true target to 19
-    s.i.insn = "Instr(Move(Src::Immediate(19), Dst::BT_Target, true), Move(Src::Zero, Dst::ALU_OpA, false))" 
+    s.i.insn = "Instr(Move(Src::Immediate(19), Dst::BT_Target, true), Move(Src::Zero, Dst::ALU_OpA, false))"
     await FallingEdge(clk)
     s.o.pc_val.assert_eq(2)
     s.o.pc_jump_comb.assert_eq("None")
@@ -586,7 +586,7 @@ async def test_branch_precedence_over_unconditional(dut):
     s.i.insn = "Instr(Move(Src::Immediate(1), Dst::PC_Trig, true), Move(Src::Immediate(1), Dst::BT_Trig, true))"
     await FallingEdge(clk)
     s.o.pc_val.assert_eq(19)            # PC jumped to 19 instead of 1 from unconditional move
-    
+
 
 @cocotb.test()
 async def test_clock_counter(dut):
@@ -600,7 +600,7 @@ async def test_clock_counter(dut):
         units='ns'
     ).start())
 
-    
+
     s.i.rst = True
     s.i.insn = "Instr(Move(Src::Zero, Dst::ALU_OpA, false), Move(Src::Zero, Dst::ALU_OpA, false))" #NOP
     await FallingEdge(clk)
@@ -617,14 +617,13 @@ async def test_clock_counter(dut):
     await FallingEdge(clk)
     await FallingEdge(clk)
     await FallingEdge(clk)
-    
-    s.i.insn = "Instr(Move(Src::CC_Res_Lo,  Dst::ALU_Add_Trig, true), Move(Src::Zero, Dst::ALU_OpA, false))" 
+
+    s.i.insn = "Instr(Move(Src::CC_Res_Lo,  Dst::ALU_Add_Trig, true), Move(Src::Zero, Dst::ALU_OpA, false))"
     await FallingEdge(clk)
     s.o.pc_val.assert_eq(11)
     s.o.alu_t_comb.assert_eq("Some((AluOp::Add(),11))") # ALU trigger will show 11 clock cycles on the counter
 
-    s.i.insn = "Instr(Move(Src::CC_Res_High,  Dst::ALU_Add_Trig, true), Move(Src::Zero, Dst::ALU_OpA, false))" 
+    s.i.insn = "Instr(Move(Src::CC_Res_High,  Dst::ALU_Add_Trig, true), Move(Src::Zero, Dst::ALU_OpA, false))"
     await FallingEdge(clk)
     s.o.pc_val.assert_eq(12)
     s.o.alu_t_comb.assert_eq("Some((AluOp::Add(),0))") # ALU trigger will show 0 in the high bits
-
